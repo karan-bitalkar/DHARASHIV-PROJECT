@@ -5,6 +5,7 @@ import { useOrders } from '../OrderContext';
 import { useAuth } from '../AuthContext';
 import toast from 'react-hot-toast';
 import InvoiceModal from '../InvoiceModal';
+import PaymentGatewayModal from '../PaymentGatewayModal';
 
 const INDIAN_STATES = [
   'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Gujarat', 
@@ -99,7 +100,11 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [paymentError, setPaymentError] = useState('');
 
+  // Dummy Payment Gateway Modal State (Razorpay / Stripe Simulation)
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
   // UPI sub-options
+  const [upiMode, setUpiMode] = useState('id'); // 'id' (Type UPI ID) or 'qr' (Scan QR Code)
   const [upiType, setUpiType] = useState('phonepe');
   const [upiId, setUpiId] = useState('');
 
@@ -185,81 +190,15 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePlaceOrder = () => {
-    // Reset previous errors
-    setPaymentError('');
-    setCodError('');
-
-    // 1. Strict Address Validation
-    const isAddressValid = validateAddress();
-    if (!isAddressValid) {
-      setIsEditingAddress(true);
-      toast.error('Please complete all required fields in the delivery address!');
-      const addressEl = document.getElementById('address-section');
-      if (addressEl) {
-        addressEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      return;
-    }
-
-    // 2. Strict Payment Method Validation
-    if (!paymentMethod) {
-      setPaymentError('Please select a payment method.');
-      toast.error('Please select a payment method.', { id: 'payment-error-toast' });
-      const paymentEl = document.getElementById('payment-section');
-      if (paymentEl) {
-        paymentEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-      return;
-    }
-
-    // 3. Strict COD Captcha Verification (if user selects COD)
-    if (paymentMethod === 'cod') {
-      if (!captchaInput.trim()) {
-        setCodError('Please enter the 4-digit code shown above');
-        toast.error('Please enter the 4-digit verification code for COD.');
-        const codEl = document.getElementById('cod-section');
-        if (codEl) {
-          codEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
-      }
-      if (captchaInput.trim() !== captchaCode) {
-        setCodError('Incorrect code. Please enter the exact 4 digits shown.');
-        toast.error('Invalid verification code for Cash on Delivery.');
-        return;
-      }
-    }
-
-    // 4. Cart / Items Validation
-    if (activeItems.length === 0) {
-      toast.error('No items to checkout! Please add products to cart.');
-      navigate('/products');
-      return;
-    }
-
-    // Save validated address to localStorage
-    try {
-      localStorage.setItem('protinut_delivery_address', JSON.stringify(address));
-    } catch {}
-
-    let paymentLabel = 'Cash on Delivery (COD)';
-    if (paymentMethod === 'upi') {
-      paymentLabel = `UPI (${upiType === 'id' ? (upiId || 'Custom ID') : upiType.toUpperCase()})`;
-    } else if (paymentMethod === 'card') {
-      paymentLabel = `Credit/Debit Card (Ending ${cardData.number.slice(-4) || '4242'})`;
-    } else if (paymentMethod === 'netbanking') {
-      paymentLabel = `Net Banking (${selectedBank})`;
-    }
-
+  // ── Central Order Execution Function ──
+  const executeOrderPlacement = (paymentMethodLabel, isCod = false) => {
     setIsPlacingOrder(true);
 
-    // Simulate order placement with 1 second spinner
     setTimeout(() => {
       const order = placeOrder({
         items: activeItems,
         address,
-        paymentMethod: paymentLabel,
+        paymentMethod: paymentMethodLabel,
         subtotal: activeSubtotal,
         discount: activeDiscount,
         cgst: activeCgst,
@@ -290,9 +229,136 @@ const CheckoutPage = () => {
 
       setIsPlacingOrder(false);
       setPlacedOrder(order);
-      toast.success('🎉 Order Placed Successfully!');
+      if (isCod) {
+        toast.success('Order Placed Successfully (COD)!');
+      } else {
+        toast.success('🎉 Order Placed Successfully!');
+      }
       navigate('/order-success', { state: { order } });
-    }, 1000);
+    }, isCod ? 1000 : 300);
+  };
+
+  // ── Dummy Gateway Simulation Handlers ──
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false);
+    toast.success('Payment Successful! 🎉');
+
+    let paymentLabel = 'Online Payment';
+    if (paymentMethod === 'upi') {
+      paymentLabel = `UPI (${upiMode === 'qr' ? 'QR Code Scan' : (upiType === 'id' ? (upiId || 'Custom ID') : upiType.toUpperCase())})`;
+    } else if (paymentMethod === 'card') {
+      paymentLabel = `Credit/Debit Card (Ending ${cardData.number.slice(-4) || '4242'})`;
+    } else if (paymentMethod === 'netbanking') {
+      paymentLabel = `Net Banking (${selectedBank})`;
+    }
+
+    executeOrderPlacement(paymentLabel, false);
+  };
+
+  const handlePaymentFailure = () => {
+    setShowPaymentModal(false);
+    toast.error('Payment Failed. Please try again.');
+  };
+
+  // ── Place Order Validation & Payment Trigger ──
+  const handlePlaceOrder = () => {
+    // Reset previous errors
+    setPaymentError('');
+    setCodError('');
+
+    // 1. Strict Address Validation
+    const isAddressValid = validateAddress();
+    if (!isAddressValid) {
+      setIsEditingAddress(true);
+      toast.error('Please complete all required fields in the delivery address!');
+      const addressEl = document.getElementById('address-section');
+      if (addressEl) {
+        addressEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
+    // 2. Strict Payment Method Validation
+    if (!paymentMethod) {
+      setPaymentError('Please select a payment method.');
+      toast.error('Please select a payment method.', { id: 'payment-error-toast' });
+      const paymentEl = document.getElementById('payment-section');
+      if (paymentEl) {
+        paymentEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+
+    // 3. Cart / Items Validation
+    if (activeItems.length === 0) {
+      toast.error('No items to checkout! Please add products to cart.');
+      navigate('/products');
+      return;
+    }
+
+    // Save validated address to localStorage
+    try {
+      localStorage.setItem('protinut_delivery_address', JSON.stringify(address));
+    } catch {}
+
+    // ── CASE 1: Cash on Delivery (COD) ──
+    if (paymentMethod === 'cod') {
+      if (!captchaInput.trim()) {
+        setCodError('Please enter the 4-digit code shown above');
+        toast.error('Please enter the 4-digit verification code for COD.');
+        const codEl = document.getElementById('cod-section');
+        if (codEl) {
+          codEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+      if (captchaInput.trim() !== captchaCode) {
+        setCodError('Incorrect code. Please enter the exact 4 digits shown.');
+        toast.error('Invalid verification code for Cash on Delivery.');
+        return;
+      }
+
+      // Directly place COD order with loading spinner
+      executeOrderPlacement('Cash on Delivery (COD)', true);
+      return;
+    }
+
+    // ── CASE 2: Online Payments (UPI, Card, Net Banking) ──
+    // Future Razorpay / Stripe Code Structure:
+    const initiatePayment = async () => {
+      // 1. Call backend to create Razorpay Order ID
+      // const { razorpayOrderId } = await api.post('/api/payment/create-order', {
+      //   amount: activeGrandTotal * 100,
+      //   currency: 'INR'
+      // });
+      //
+      // 2. Initialize Razorpay Checkout with prefilled mobile number & customer details
+      // const options = {
+      //   key: "RAZORPAY_KEY",
+      //   amount: activeGrandTotal * 100,
+      //   order_id: razorpayOrderId,
+      //   name: "PROTINUT Nutrition",
+      //   description: "100% Roasted Peanut Butter Order",
+      //   image: "/protinut-logo.png",
+      //   prefill: {
+      //     name: address.name,
+      //     email: user?.email || `${address.name.toLowerCase().replace(/\s+/g, '')}@protinut.in`,
+      //     contact: address.mobile
+      //   },
+      //   theme: { color: "#ef5323" },
+      //   handler: function (response) {
+      //     // verify signature and complete order
+      //     handlePaymentSuccess();
+      //   }
+      // };
+      // const rzp = new window.Razorpay(options);
+      // rzp.open();
+      //
+      // FOR NOW: Open the realistic Dummy Payment Gateway Modal with Success/Failure simulation
+      setShowPaymentModal(true);
+    };
+
+    initiatePayment();
   };
 
   // If order was just placed, show Flipkart Order Confirmation Screen
@@ -727,37 +793,117 @@ const CheckoutPage = () => {
 
                       {paymentMethod === 'upi' && (
                         <div className="mt-4 pt-3 border-t border-gray-200 space-y-3">
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              { id: 'phonepe', label: 'PhonePe' },
-                              { id: 'gpay', label: 'Google Pay' },
-                              { id: 'paytm', label: 'Paytm' },
-                              { id: 'id', label: 'Enter UPI ID' }
-                            ].map((app) => (
-                              <button
-                                key={app.id}
-                                type="button"
-                                onClick={() => setUpiType(app.id)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
-                                  upiType === app.id
-                                    ? 'bg-primary text-white border-primary shadow-sm'
-                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                                }`}
-                              >
-                                {app.label}
-                              </button>
-                            ))}
+                          {/* Sub-mode selector: Type UPI ID vs Scan QR Code */}
+                          <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+                            <button
+                              type="button"
+                              onClick={() => setUpiMode('id')}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                                upiMode === 'id'
+                                  ? 'bg-primary text-white shadow-sm'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              <span>✏️ Enter UPI ID / VPA</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setUpiMode('qr')}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                                upiMode === 'qr'
+                                  ? 'bg-primary text-white shadow-sm'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }`}
+                            >
+                              <span>📱 Scan QR Code</span>
+                            </button>
                           </div>
 
-                          {upiType === 'id' && (
-                            <div className="max-w-xs">
-                              <input
-                                type="text"
-                                placeholder="username@okhdfcbank"
-                                value={upiId}
-                                onChange={(e) => setUpiId(e.target.value)}
-                                className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                              />
+                          {upiMode === 'id' ? (
+                            <div className="space-y-3">
+                              <div className="flex flex-wrap gap-2">
+                                {[
+                                  { id: 'phonepe', label: 'PhonePe', handle: '@ybl' },
+                                  { id: 'gpay', label: 'Google Pay', handle: '@okaxis' },
+                                  { id: 'paytm', label: 'Paytm', handle: '@paytm' },
+                                  { id: 'bhim', label: 'BHIM UPI', handle: '@upi' }
+                                ].map((app) => (
+                                  <button
+                                    key={app.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setUpiType(app.id);
+                                      if (!upiId) setUpiId(`user${app.handle}`);
+                                    }}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                                      upiType === app.id
+                                        ? 'bg-primary/10 text-primary border-primary font-black shadow-sm'
+                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                  >
+                                    {app.label}
+                                  </button>
+                                ))}
+                              </div>
+
+                              <div className="max-w-sm">
+                                <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
+                                  Virtual Payment Address (VPA) *
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. user@okicici or 9876543210@ybl"
+                                  value={upiId}
+                                  onChange={(e) => setUpiId(e.target.value)}
+                                  className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                                />
+                                <span className="text-[11px] text-gray-400 mt-1 block">
+                                  A payment request will be sent to your UPI app for authorization.
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            /* Scan QR Code Box */
+                            <div className="bg-white border border-gray-200 rounded-xl p-4 text-center max-w-xs space-y-2 shadow-sm">
+                              <span className="text-xs font-bold text-gray-800 block">
+                                Scan with any UPI App
+                              </span>
+                              <div className="w-36 h-36 mx-auto bg-amber-50/50 p-2.5 rounded-xl border border-dashed border-primary/40 flex items-center justify-center relative">
+                                <svg className="w-32 h-32 text-gray-900" viewBox="0 0 100 100" fill="currentColor">
+                                  {/* Corner Top-Left */}
+                                  <rect x="5" y="5" width="28" height="28" rx="4" fill="#ef5323" />
+                                  <rect x="11" y="11" width="16" height="16" fill="white" />
+                                  <rect x="15" y="15" width="8" height="8" rx="2" fill="#ef5323" />
+                                  {/* Corner Top-Right */}
+                                  <rect x="67" y="5" width="28" height="28" rx="4" fill="#ef5323" />
+                                  <rect x="73" y="11" width="16" height="16" fill="white" />
+                                  <rect x="77" y="15" width="8" height="8" rx="2" fill="#ef5323" />
+                                  {/* Corner Bottom-Left */}
+                                  <rect x="5" y="67" width="28" height="28" rx="4" fill="#ef5323" />
+                                  <rect x="11" y="73" width="16" height="16" fill="white" />
+                                  <rect x="15" y="77" width="8" height="8" rx="2" fill="#ef5323" />
+                                  {/* Dummy Data Bits */}
+                                  <rect x="40" y="8" width="8" height="8" fill="#1f2937" />
+                                  <rect x="52" y="12" width="6" height="6" fill="#1f2937" />
+                                  <rect x="42" y="24" width="14" height="6" fill="#1f2937" />
+                                  <rect x="8" y="42" width="10" height="6" fill="#1f2937" />
+                                  <rect x="24" y="48" width="8" height="8" fill="#1f2937" />
+                                  <rect x="38" y="40" width="24" height="24" rx="4" fill="#2b1810" />
+                                  <circle cx="50" cy="52" r="5" fill="#ef5323" />
+                                  <rect x="68" y="42" width="8" height="8" fill="#1f2937" />
+                                  <rect x="82" y="46" width="10" height="6" fill="#1f2937" />
+                                  <rect x="42" y="70" width="8" height="14" fill="#1f2937" />
+                                  <rect x="56" y="76" width="12" height="8" fill="#1f2937" />
+                                  <rect x="76" y="68" width="16" height="8" fill="#1f2937" />
+                                  <rect x="82" y="82" width="12" height="10" fill="#1f2937" />
+                                </svg>
+                              </div>
+                              <div className="text-xs font-black text-primary font-['Montserrat']">
+                                Amount: ₹{activeGrandTotal}
+                              </div>
+                              <div className="flex items-center justify-center gap-1.5 text-[10px] text-gray-500 font-semibold">
+                                <span>GPay</span> • <span>PhonePe</span> • <span>Paytm</span> • <span>BHIM</span>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -786,32 +932,62 @@ const CheckoutPage = () => {
 
                       {paymentMethod === 'card' && (
                         <div className="mt-4 pt-3 border-t border-gray-200 max-w-md space-y-3">
-                          <input
-                            type="text"
-                            maxLength={19}
-                            placeholder="Card Number (e.g. 4242 •••• •••• 4242)"
-                            value={cardData.number}
-                            onChange={(e) => setCardData({ ...cardData, number: e.target.value })}
-                            className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                          />
-                          <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
+                              Card Number *
+                            </label>
                             <input
                               type="text"
-                              maxLength={5}
-                              placeholder="MM/YY"
-                              value={cardData.expiry}
-                              onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
-                              className="px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
-                            <input
-                              type="password"
-                              maxLength={4}
-                              placeholder="CVV"
-                              value={cardData.cvv}
-                              onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
-                              className="px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                              maxLength={19}
+                              placeholder="4242 •••• •••• 4242"
+                              value={cardData.number}
+                              onChange={(e) => setCardData({ ...cardData, number: e.target.value })}
+                              className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
                             />
                           </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
+                                Valid Thru *
+                              </label>
+                              <input
+                                type="text"
+                                maxLength={5}
+                                placeholder="MM/YY"
+                                value={cardData.expiry}
+                                onChange={(e) => setCardData({ ...cardData, expiry: e.target.value })}
+                                className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
+                                CVV / CVC *
+                              </label>
+                              <input
+                                type="password"
+                                maxLength={4}
+                                placeholder="•••"
+                                value={cardData.cvv}
+                                onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
+                                className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
+                              Cardholder Name
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Name as printed on card"
+                              value={cardData.name}
+                              onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                              className="w-full px-3.5 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                          </div>
+                          <p className="text-[11px] text-gray-400">
+                            🔒 Dummy card fields for simulation. Will be replaced by Razorpay/Stripe secure element in production.
+                          </p>
                         </div>
                       )}
                     </div>
@@ -834,18 +1010,27 @@ const CheckoutPage = () => {
                       <p className="text-xs text-gray-500 mt-0.5">Select from top Indian banks.</p>
 
                       {paymentMethod === 'netbanking' && (
-                        <div className="mt-4 pt-3 border-t border-gray-200 max-w-sm">
+                        <div className="mt-4 pt-3 border-t border-gray-200 max-w-sm space-y-2">
+                          <label className="block text-[11px] font-bold text-gray-600 uppercase">
+                            Select Your Bank *
+                          </label>
                           <select
                             value={selectedBank}
                             onChange={(e) => setSelectedBank(e.target.value)}
-                            className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white font-semibold"
+                            className="w-full px-3.5 py-2.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white font-semibold"
                           >
                             <option value="HDFC Bank">HDFC Bank</option>
                             <option value="State Bank of India">State Bank of India (SBI)</option>
                             <option value="ICICI Bank">ICICI Bank</option>
                             <option value="Axis Bank">Axis Bank</option>
                             <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                            <option value="Punjab National Bank">Punjab National Bank (PNB)</option>
+                            <option value="Bank of Baroda">Bank of Baroda</option>
+                            <option value="Canara Bank">Canara Bank</option>
                           </select>
+                          <p className="text-[11px] text-gray-400">
+                            You will be redirected to your bank's secure page to authorize payment.
+                          </p>
                         </div>
                       )}
                     </div>
@@ -895,6 +1080,9 @@ const CheckoutPage = () => {
                               <span>⚠️</span> {codError}
                             </p>
                           )}
+                          <p className="text-[11px] text-gray-400">
+                            Cash or UPI QR payment accepted upon courier delivery.
+                          </p>
                         </div>
                       )}
                     </div>
