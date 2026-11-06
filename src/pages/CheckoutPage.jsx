@@ -3,6 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../CartContext';
 import { useOrders } from '../OrderContext';
 import { useAuth } from '../AuthContext';
+import { useAdminStore } from '../AdminStoreContext';
+import { getProductPricing } from '../productPricing';
+import { isProductPurchasable } from '../productAvailability';
 import toast from 'react-hot-toast';
 import InvoiceModal from '../InvoiceModal';
 import PaymentGatewayModal from '../PaymentGatewayModal';
@@ -24,17 +27,17 @@ const CheckoutPage = () => {
     sgst,
     totalGst,
     deliveryCharge,
-    grandTotal,
-    clearCart
+    grandTotal
   } = useCart();
 
   const { placeOrder } = useOrders();
-  const { user, login } = useAuth();
+  const { user } = useAuth();
+  const { products } = useAdminStore();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Buy Now direct purchase support (does not modify persistent cart)
-  const buyNowItem = location.state?.buyNowItem || (() => {
+  const buyNowSnapshot = location.state?.buyNowItem || (() => {
     try {
       const saved = sessionStorage.getItem('protinut_buy_now_item');
       return saved ? JSON.parse(saved) : null;
@@ -42,7 +45,25 @@ const CheckoutPage = () => {
       return null;
     }
   })();
+  const buyNowProduct = buyNowSnapshot
+    ? products.find((product) => product.id === buyNowSnapshot.id)
+    : null;
+  const buyNowPricing = buyNowProduct
+    ? getProductPricing(buyNowProduct, buyNowSnapshot.selectedWeight || buyNowSnapshot.weight)
+    : null;
+  const buyNowItem = buyNowSnapshot && buyNowPricing
+    ? {
+      ...buyNowSnapshot,
+      name: buyNowProduct.name,
+      finalPrice: buyNowPricing.finalPrice,
+      originalPrice: buyNowPricing.mrp
+    }
+    : buyNowSnapshot;
   const activeItems = buyNowItem ? [buyNowItem] : cartItems;
+  const unavailableItems = activeItems.filter((item) => {
+    const currentProduct = products.find((product) => product.id === item.id);
+    return !currentProduct || !isProductPurchasable(currentProduct);
+  });
   const activeCount = buyNowItem ? (buyNowItem.quantity || 1) : totalCartCount;
   const activeSubtotal = buyNowItem 
     ? (buyNowItem.finalPrice * (buyNowItem.quantity || 1))
@@ -192,6 +213,10 @@ const CheckoutPage = () => {
 
   // ── Central Order Execution Function ──
   const executeOrderPlacement = (paymentMethodLabel, isCod = false) => {
+    if (unavailableItems.length > 0) {
+      toast.error('An item in your order is no longer available.');
+      return;
+    }
     setIsPlacingOrder(true);
 
     setTimeout(() => {
@@ -209,22 +234,8 @@ const CheckoutPage = () => {
         userEmail: user?.email || user?.identifier || `${address.name.toLowerCase().replace(/\s+/g, '')}@protinut.in`
       });
 
-      // Clear the cart
-      if (!buyNowItem) {
-        clearCart();
-      } else {
+      if (buyNowItem) {
         try { sessionStorage.removeItem('protinut_buy_now_item'); } catch (e) {}
-      }
-
-      // If user is guest, automatically log them in with delivery address info
-      if (!user && login) {
-        try {
-          login({
-            name: address.name,
-            phone: address.mobile,
-            email: `${address.name.toLowerCase().replace(/\s+/g, '')}@protinut.in`
-          });
-        } catch (e) {}
       }
 
       setIsPlacingOrder(false);
@@ -265,6 +276,11 @@ const CheckoutPage = () => {
     // Reset previous errors
     setPaymentError('');
     setCodError('');
+
+    if (unavailableItems.length > 0) {
+      toast.error('An item in your order is no longer available.');
+      return;
+    }
 
     // 1. Strict Address Validation
     const isAddressValid = validateAddress();
@@ -462,7 +478,7 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] py-6 px-3 sm:px-6 lg:px-8 pb-28 md:pb-8 font-sans">
+    <div className="min-h-screen bg-[#f1f3f6] py-6 px-3 sm:px-6 lg:px-8 pb-40 md:pb-8 font-sans">
       <div className="max-w-6xl mx-auto">
         
         {/* Flipkart Checkout Header Strip */}
@@ -1092,10 +1108,15 @@ const CheckoutPage = () => {
               </div>
 
               {/* Big Place Order Button (Flipkart Style) */}
-              <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+              <div className="checkout-place-order-bar p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                {unavailableItems.length > 0 && (
+                  <p role="alert" className="mr-auto self-center text-sm font-bold text-red-700">
+                    Unavailable: {unavailableItems.map((item) => item.name).join(', ')}. Remove it from your {buyNowItem ? 'purchase' : 'cart'} to continue.
+                  </p>
+                )}
                 <button
                   type="button"
-                  disabled={isPlacingOrder}
+                  disabled={isPlacingOrder || unavailableItems.length > 0}
                   onClick={handlePlaceOrder}
                   className="w-full sm:w-auto bg-[#fb641b] hover:bg-[#e85a14] active:bg-[#d44e10] text-white font-extrabold uppercase text-sm tracking-wider px-10 py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2"
                 >
@@ -1216,7 +1237,7 @@ const CheckoutPage = () => {
             </div>
             <button
               type="button"
-              disabled={isPlacingOrder}
+              disabled={isPlacingOrder || unavailableItems.length > 0}
               onClick={handlePlaceOrder}
               className="bg-[#fb641b] hover:bg-[#e85a14] active:bg-[#d44e10] text-white font-extrabold uppercase text-xs tracking-wider px-6 py-3 rounded-lg shadow-md flex items-center gap-1.5"
             >

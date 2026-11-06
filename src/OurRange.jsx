@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useAdminStore } from './AdminStoreContext';
+import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProductPurchasable } from './productAvailability';
 import './OurRange.css';
 
-const allProductsData = [
+export const allProductsData = [
   // ── 1. The 2 Main Signature Products (In Stock & Available) ──
   {
     id: 'classy-crunch',
@@ -239,6 +241,7 @@ const OurRange = ({
   wishlistItems = [],
   onToggleWishlist
 }) => {
+  const { products } = useAdminStore();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('featured');
@@ -259,7 +262,7 @@ const OurRange = ({
   };
 
   const handleBuyNowClick = (product) => {
-    if (!product.inStock) {
+    if (!isProductPurchasable(product)) {
       if (onQuickView) {
         onQuickView({ ...product, isAvailable: false });
       } else {
@@ -286,7 +289,7 @@ const OurRange = ({
   };
 
   const handleAddToCartClick = (product) => {
-    if (!product.inStock) {
+    if (!isProductPurchasable(product)) {
       if (onQuickView) {
         onQuickView({ ...product, isAvailable: false });
       } else {
@@ -302,15 +305,17 @@ const OurRange = ({
     const matchedOption = product.weightOptions.find((w) => w.id === activeWeightId) || product.weightOptions[0];
     const finalPrice = matchedOption.price;
 
-    setAddedIds((prev) => ({ ...prev, [product.id]: true }));
-
+    let added = true;
     if (onAddToCart) {
-      onAddToCart({
+      added = onAddToCart({
         ...product,
         selectedWeight: matchedOption.label,
         finalPrice: finalPrice
       });
     }
+    if (added === false) return;
+
+    setAddedIds((prev) => ({ ...prev, [product.id]: true }));
 
     setTimeout(() => {
       setAddedIds((prev) => ({ ...prev, [product.id]: false }));
@@ -318,10 +323,10 @@ const OurRange = ({
   };
 
   // Filter logic
-  let displayedList = allProductsData;
+  let displayedList = products;
 
   if (activeCategory === 'in-stock') {
-    displayedList = displayedList.filter((p) => p.inStock);
+    displayedList = displayedList.filter(isProductPurchasable);
   } else if (activeCategory !== 'all') {
     displayedList = displayedList.filter((p) => p.category === activeCategory);
   }
@@ -330,7 +335,7 @@ const OurRange = ({
   if (searchTerm.trim()) {
     const q = searchTerm.toLowerCase();
     displayedList = displayedList.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.tag.toLowerCase().includes(q)
+      (p) => p.name.toLowerCase().includes(q) || String(p.description || '').toLowerCase().includes(q) || String(p.tag || '').toLowerCase().includes(q)
     );
   }
 
@@ -466,7 +471,8 @@ const OurRange = ({
           <div className="range-products-grid">
             {displayedList.map((item) => {
               const isAdded = addedIds[item.id];
-              const isAvailable = item.inStock;
+              const stockStatus = getProductStockStatus(item);
+              const isAvailable = isProductPurchasable(item);
               const activeWeightId = selectedWeights[item.id] || item.defaultWeight;
               const matchedWeight = item.weightOptions.find((w) => w.id === activeWeightId) || item.weightOptions[0];
               const displayPrice = matchedWeight.price;
@@ -615,11 +621,9 @@ const OurRange = ({
                         <span className="discount-tag">{discountPercent}% OFF</span>
                       </div>
                       
-                      {isAvailable ? (
-                        <span className="stock-in-indicator available">● In Stock</span>
-                      ) : (
-                        <span className="stock-in-indicator unavailable">○ Currently Unavailable</span>
-                      )}
+                      <span className={`product-stock-status status-${getStockStatusClass(stockStatus)}`}>
+                        {getStockStatusIcon(stockStatus)} {stockStatus}
+                      </span>
                     </div>
 
                     {/* Add to Cart CTA OR Notify Me Button */}
@@ -659,15 +663,14 @@ const OurRange = ({
                         </button>
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        className="btn-notify-when-available"
-                        onClick={() => handleAddToCartClick(item)}
-                        aria-label={`Get notified when ${item.name} is available`}
-                      >
-                        <span className="bell-icon">🔔</span>
-                        <span>Currently Unavailable (Notify Me)</span>
-                      </button>
+                      <div className="card-cta-btn-group">
+                        <button type="button" className="btn-add-to-cart is-disabled" disabled>
+                          {stockStatus}
+                        </button>
+                        <button type="button" className="btn-card-buy-now is-disabled" disabled>
+                          Buy Now Unavailable
+                        </button>
+                      </div>
                     )}
 
                   </div>

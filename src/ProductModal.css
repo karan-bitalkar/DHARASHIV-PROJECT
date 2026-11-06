@@ -136,6 +136,30 @@
   border: 1px solid #fecaca;
 }
 
+.modal-status-badge.status-low-stock {
+  background: #fff3d6;
+  color: #b45309;
+  border: 1px solid #fed7aa;
+}
+
+.modal-status-badge.status-high-demand {
+  background: #fff0e8;
+  color: #d9480f;
+  border: 1px solid #fdba74;
+}
+
+.modal-status-badge.status-out-of-stock {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.modal-status-badge.status-currently-unavailable {
+  background: #f1e9e5;
+  color: #6b3b32;
+  border: 1px solid #dfd1ca;
+}
+
 /* Nutrition Highlights */
 .modal-nutrition-row {
   display: grid;

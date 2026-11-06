@@ -36,7 +36,7 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
   // Open "Rate & Review" handler with strict Login Requirement
   const handleOpenWriteReview = () => {
     if (!isAuthenticated) {
-      toast.error('Please login to write a review', {
+      toast.error('Please login or register to write a review', {
         id: 'auth-review-toast',
         duration: 3500,
         style: {
@@ -59,6 +59,14 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
   // Submit review handler
   const handleSubmitReview = (e) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setIsWriteModalOpen(false);
+      const redirectUrl = encodeURIComponent(location.pathname + location.search);
+      navigate(`/login?redirect=${redirectUrl}`);
+      toast.error('Please login or register to write a review');
+      return;
+    }
 
     if (!formTitle.trim()) {
       toast.error('Please enter a review headline', { id: 'review-title-error' });

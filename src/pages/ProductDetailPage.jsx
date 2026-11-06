@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ProductReviewSection from '../ProductReviewSection';
+import { useAdminStore } from '../AdminStoreContext';
+import { useGlobalSettings } from '../GlobalSettingsContext';
+import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProductPurchasable } from '../productAvailability';
 import './ProductDetailPage.css';
 
 const productsDatabase = {
@@ -72,9 +75,14 @@ const ProductDetailPage = ({
 }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { products } = useAdminStore();
+  const { settings } = useGlobalSettings();
 
   // Find product or fallback to classy-crunch
-  const product = productsDatabase[id] || productsDatabase['classy-crunch'];
+  const product = {
+    ...(productsDatabase[id] || productsDatabase['classy-crunch']),
+    ...(products.find((item) => item.id === id) || {})
+  };
 
   const [selectedWeight, setSelectedWeight] = useState('550gm');
   const [quantity, setQuantity] = useState(1);
@@ -90,10 +98,13 @@ const ProductDetailPage = ({
   const currentPrice = selectedWeight === '1kg' ? product.price1kg : product.price550;
   const originalPrice = selectedWeight === '1kg' ? product.originalPrice1kg : product.originalPrice550;
   const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+  const stockStatus = getProductStockStatus(product);
+  const canPurchase = isProductPurchasable(product);
 
   const isWishlisted = wishlistItems.some((w) => w.id === product.id);
 
   const handleAddToCartClick = () => {
+    if (!canPurchase) return;
     if (onAddToCart) {
       onAddToCart({
         id: product.id,
@@ -107,6 +118,7 @@ const ProductDetailPage = ({
   };
 
   const handleBuyNowClick = () => {
+    if (!canPurchase) return;
     const itemData = {
       id: product.id,
       name: product.name,
@@ -198,6 +210,9 @@ const ProductDetailPage = ({
               <span className="original-price-strike">₹{originalPrice}</span>
               <span className="discount-pill-green">SAVE {discount}% OFF</span>
             </div>
+            <span className={`product-stock-status status-${getStockStatusClass(stockStatus)}`}>
+              {getStockStatusIcon(stockStatus)} {stockStatus}
+            </span>
             <span className="tax-inclusive-note">Inclusive of all taxes • Free Delivery across India</span>
           </div>
 
@@ -263,16 +278,18 @@ const ProductDetailPage = ({
               type="button"
               className="btn-detail-add-cart"
               onClick={handleAddToCartClick}
+              disabled={!canPurchase}
             >
-              Add To Cart 🛍️
+              {canPurchase ? 'Add To Cart 🛍️' : stockStatus}
             </button>
 
             <button
               type="button"
               className="btn-detail-buy-now"
               onClick={handleBuyNowClick}
+              disabled={!canPurchase}
             >
-              Buy Now ⚡
+              {canPurchase ? 'Buy Now ⚡' : 'Buy Now Unavailable'}
             </button>
 
             <button
@@ -314,25 +331,33 @@ const ProductDetailPage = ({
 
       {/* ── Storage Instructions ── */}
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', background: '#fffbf5', border: '1.5px solid #ef532330', borderRadius: '14px', padding: '22px 26px', margin: '28px 0 10px' }}>
+        <div className="product-global-policy">
           <span style={{ fontSize: '2rem', lineHeight: '1' }}>📦</span>
           <div>
             <h2 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#2b1810', marginBottom: '8px', letterSpacing: '0.02em' }}>How to Store</h2>
-            <p style={{ fontSize: '0.95rem', color: '#555', lineHeight: '1.7', margin: 0 }}>Store in a cool, dry, and dark place away from direct sunlight. Do not refrigerate if you prefer it spreadable, or refrigerate after opening to preserve freshness. Natural oil separation may occur; stir well before use.</p>
+            <p>{settings.storageInstructions}</p>
           </div>
         </div>
 
         {/* ── Manufacturer & Marketed By ── */}
-        <div style={{ background: '#f9f9f9', border: '1.5px solid #e5e7eb', borderRadius: '14px', padding: '22px 26px', margin: '14px 0 28px' }}>
+        <div className="product-global-policy product-manufacturer-info">
           <h2 style={{ fontSize: '1rem', fontWeight: '700', color: '#2b1810', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Manufacturer &amp; Marketed By</h2>
           <p style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.8', margin: '0 0 8px' }}>
-            <strong>PROTINUT FOODS</strong><br />
-            Laxmi Niwas, Vidya Nagar, Dharashiv (Gramin), Dharashiv Taluka, Dharashiv, Maharashtra - 413501
+            <strong>{settings.companyName}</strong><br />
+            {settings.companyAddress}
           </p>
           <p style={{ fontSize: '0.9rem', color: '#444', margin: '0 0 6px' }}>🌏 Country of Origin: <strong>Product of India</strong></p>
-          <p style={{ fontSize: '0.9rem', color: '#444', margin: '0 0 6px' }}>📧 <a href="mailto:protinut.in@gmail.com" style={{ color: '#ef5323', textDecoration: 'underline' }}>protinut.in@gmail.com</a></p>
-          <p style={{ fontSize: '0.9rem', color: '#444', margin: '0 0 6px' }}>📞 <a href="tel:+918308302301" style={{ color: '#ef5323', textDecoration: 'underline' }}>+91 830 830 2301</a></p>
-          <p style={{ fontSize: '0.85rem', color: '#888', margin: '8px 0 0', fontStyle: 'italic' }}>FSSAI No: 21526050000128</p>
+          <p style={{ fontSize: '0.9rem', color: '#444', margin: '0 0 6px' }}>📧 <a href={`mailto:${settings.supportEmail}`} style={{ color: '#087c4b', textDecoration: 'underline' }}>{settings.supportEmail}</a></p>
+          <p style={{ fontSize: '0.9rem', color: '#444', margin: '0 0 6px' }}>📞 <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`} style={{ color: '#087c4b', textDecoration: 'underline' }}>{settings.supportPhone}</a></p>
+          <p style={{ fontSize: '0.85rem', color: '#888', margin: '8px 0 0', fontStyle: 'italic' }}>GSTIN: {settings.gstin} · FSSAI No: {settings.fssai}</p>
+        </div>
+        <div className="product-global-policy product-policy-copy">
+          <h2>Shipping Policy</h2>
+          <p>{settings.shippingPolicy}</p>
+        </div>
+        <div className="product-global-policy product-policy-copy">
+          <h2>Return &amp; Refund Policy</h2>
+          <p>{settings.returnPolicy}</p>
         </div>
       </div>
 

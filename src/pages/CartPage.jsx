@@ -33,7 +33,7 @@ const CartPage = () => {
   const amountNeededForFreeDelivery = Math.max(0, freeDeliveryThreshold - subtotal);
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] py-6 px-3 sm:px-6 lg:px-8 pb-28 md:pb-8 font-sans">
+    <div className="min-h-screen bg-[#f1f3f6] py-6 px-3 sm:px-6 lg:px-8 pb-40 md:pb-8 font-sans">
       <div className="max-w-6xl mx-auto">
         
         {/* Breadcrumb & Protinut / Flipkart Bar */}
@@ -69,7 +69,7 @@ const CartPage = () => {
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-8 py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+              className="inline-flex cursor-pointer items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold px-8 py-3.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
             >
               <span>Shop Now</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ const CartPage = () => {
                 })}
 
                 {/* Bottom Checkout Callout Strip */}
-                <div className="p-4 bg-white flex justify-end">
+                <div className="cart-mobile-checkout p-4 bg-white flex justify-end">
                   <button
                     onClick={() => navigate('/checkout')}
                     className="w-full sm:w-auto bg-[#fb641b] hover:bg-[#e85a14] text-white font-extrabold uppercase text-sm tracking-wider px-10 py-3.5 rounded shadow hover:shadow-md transition duration-150 text-center"

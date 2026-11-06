@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './Pages.css';
+import { useGlobalSettings } from '../GlobalSettingsContext';
 
 const ContactPage = () => {
+  const { settings } = useGlobalSettings();
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -25,10 +27,10 @@ const ContactPage = () => {
       <div className="page-hero-banner">
         <span className="page-hero-badge">GET IN TOUCH</span>
         <h1 className="page-hero-title">
-          We’d Love To <span className="highlight-orange">Hear From You</span>
+          {settings.contactHeading}
         </h1>
         <p className="page-hero-subtitle">
-          Have questions about our ingredients, wholesale distribution, bulk gym orders, or delivery status? Reach out to our team in Maharashtra!
+          {settings.contactSubtitle}
         </p>
       </div>
 
@@ -48,7 +50,7 @@ const ContactPage = () => {
                   <span className="detail-icon">📍</span>
                   <div>
                     <strong>Manufacturing & HQ:</strong>
-                    <p>PROTINUT FOODS<br/>Laxmi Niwas, Vidya Nagar, Dharashiv (Gramin), Dharashiv Taluka, Dharashiv, Maharashtra - 413501<br/>Country of Origin: Product of India</p>
+                    <p>{settings.companyName}<br />{settings.companyAddress}<br/>Country of Origin: Product of India</p>
                   </div>
                 </div>
 
@@ -56,7 +58,7 @@ const ContactPage = () => {
                   <span className="detail-icon">📧</span>
                   <div>
                     <strong>Email Us:</strong>
-                    <p><a href="mailto:protinut.in@gmail.com" className="underline">protinut.in@gmail.com</a></p>
+                    <p><a href={`mailto:${settings.supportEmail}`} className="underline">{settings.supportEmail}</a></p>
                   </div>
                 </div>
 
@@ -64,7 +66,7 @@ const ContactPage = () => {
                   <span className="detail-icon">📞</span>
                   <div>
                     <strong>Phone / WhatsApp:</strong>
-                    <p><a href="tel:+918308302301" className="underline">+91 830 830 2301</a> (Mon – Sat, 9:00 AM – 7:00 PM)</p>
+                    <p><a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`} className="underline">{settings.supportPhone}</a> (Mon – Sat, 9:00 AM – 7:00 PM)</p>
                   </div>
                 </div>
 
@@ -72,7 +74,7 @@ const ContactPage = () => {
                   <span className="detail-icon">🛡️</span>
                   <div>
                     <strong>Food Safety & Standards:</strong>
-                    <p>FSSAI No: 21526050000128</p>
+                    <p>FSSAI No: {settings.fssai}</p>
                   </div>
                 </div>
               </div>

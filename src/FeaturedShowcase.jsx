@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAdminStore } from './AdminStoreContext';
+import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProductPurchasable } from './productAvailability';
 import './FeaturedShowcase.css';
 
 const featuredProducts = [
@@ -94,6 +96,11 @@ const FeaturedShowcase = ({
   wishlistItems = [],
   onToggleWishlist
 }) => {
+  const { products } = useAdminStore();
+  const liveFeaturedProducts = featuredProducts.map((featuredProduct) => {
+    const managedProduct = products.find((product) => product.id === featuredProduct.id);
+    return managedProduct ? { ...featuredProduct, ...managedProduct } : featuredProduct;
+  });
   // Selected weights per product ('550gm' or '1kg')
   const [selectedWeights, setSelectedWeights] = useState({
     'classy-crunch': '550gm',
@@ -119,6 +126,7 @@ const FeaturedShowcase = ({
   };
 
   const handleAddToCartClick = (prod) => {
+    if (!isProductPurchasable(prod)) return;
     const weight = selectedWeights[prod.id] || '550gm';
     const price = weight === '1kg' ? prod.price1kg : prod.price550;
     const qty = quantities[prod.id] || 1;
@@ -136,6 +144,7 @@ const FeaturedShowcase = ({
   };
 
   const handleBuyNowClick = (prod) => {
+    if (!isProductPurchasable(prod)) return;
     const weight = selectedWeights[prod.id] || '550gm';
     const price = weight === '1kg' ? prod.price1kg : prod.price550;
     const original = weight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550;
@@ -171,8 +180,9 @@ const FeaturedShowcase = ({
         studioImage: prod.image,
         tag: prod.badge,
         color: prod.themeColor,
-        isAvailable: true,
-        isOutOfStock: false,
+        stockStatus: getProductStockStatus(prod),
+        isAvailable: isProductPurchasable(prod),
+        isOutOfStock: !isProductPurchasable(prod),
         description: prod.flavorNotes
       });
     }
@@ -204,13 +214,15 @@ const FeaturedShowcase = ({
             Layout: Text / Information LEFT ➔ Product Photo RIGHT
             ══════════════════════════════════════════════════════════ */}
         {(() => {
-          const prod = featuredProducts[0];
+          const prod = liveFeaturedProducts[0];
           const currentWeight = selectedWeights[prod.id] || '550gm';
           const currentPrice = currentWeight === '1kg' ? prod.price1kg : prod.price550;
           const originalPrice = currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550;
           const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
           const qty = quantities[prod.id] || 1;
           const isWishlisted = wishlistItems.some((w) => w.id === prod.id);
+          const stockStatus = getProductStockStatus(prod);
+          const canPurchase = isProductPurchasable(prod);
 
           return (
             <div className="showcase-card-row layout-text-left" key={prod.id}>
@@ -321,6 +333,10 @@ const FeaturedShowcase = ({
                   </div>
 
 
+                  <span className={`product-stock-status status-${getStockStatusClass(stockStatus)}`}>
+                    {getStockStatusIcon(stockStatus)} {stockStatus}
+                  </span>
+
                   {/* Quantity and Actions Bar */}
                   <div className="pane-action-bar">
                     <div className="qty-control">
@@ -350,6 +366,7 @@ const FeaturedShowcase = ({
                       className="pane-btn-cart"
                       style={{ background: prod.themeColor }}
                       onClick={() => handleAddToCartClick(prod)}
+                      disabled={!canPurchase}
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -363,6 +380,7 @@ const FeaturedShowcase = ({
                       type="button"
                       className="pane-btn-buy-now"
                       onClick={() => handleBuyNowClick(prod)}
+                      disabled={!canPurchase}
                     >
                       ⚡ Buy Now
                     </button>
@@ -451,13 +469,15 @@ const FeaturedShowcase = ({
             Layout: Product Photo LEFT ➔ Product Information RIGHT (Opposite!)
             ══════════════════════════════════════════════════════════ */}
         {(() => {
-          const prod = featuredProducts[1];
+          const prod = liveFeaturedProducts[1];
           const currentWeight = selectedWeights[prod.id] || '550gm';
           const currentPrice = currentWeight === '1kg' ? prod.price1kg : prod.price550;
           const originalPrice = currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550;
           const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
           const qty = quantities[prod.id] || 1;
           const isWishlisted = wishlistItems.some((w) => w.id === prod.id);
+          const stockStatus = getProductStockStatus(prod);
+          const canPurchase = isProductPurchasable(prod);
 
           return (
             <div className="showcase-card-row layout-photo-left" key={prod.id}>
@@ -609,6 +629,10 @@ const FeaturedShowcase = ({
                   </div>
 
 
+                  <span className={`product-stock-status status-${getStockStatusClass(stockStatus)}`}>
+                    {getStockStatusIcon(stockStatus)} {stockStatus}
+                  </span>
+
                   {/* Quantity and Actions Bar */}
                   <div className="pane-action-bar">
                     <div className="qty-control">
@@ -638,6 +662,7 @@ const FeaturedShowcase = ({
                       className="pane-btn-cart"
                       style={{ background: prod.themeColor }}
                       onClick={() => handleAddToCartClick(prod)}
+                      disabled={!canPurchase}
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
                         <circle cx="9" cy="21" r="1"></circle>
@@ -651,6 +676,7 @@ const FeaturedShowcase = ({
                       type="button"
                       className="pane-btn-buy-now"
                       onClick={() => handleBuyNowClick(prod)}
+                      disabled={!canPurchase}
                     >
                       ⚡ Buy Now
                     </button>

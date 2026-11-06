@@ -53,7 +53,7 @@ const WishlistPage = ({
               <span>🚫 Zero Palm Oil</span>
             </div>
 
-            <Link to="/products" className="btn-discover-products" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 32px', background: '#ef5323', color: '#ffffff', borderRadius: '12px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(239,83,35,0.3)' }}>
+            <Link to="/products" className="btn-discover-products cursor-pointer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '14px 32px', background: '#ef5323', color: '#ffffff', borderRadius: '12px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(239,83,35,0.3)' }}>
               <span>Shop Now</span>
               <span>→</span>
             </Link>

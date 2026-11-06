@@ -267,7 +267,7 @@
    ────────────────────────────────────────────────────────────── */
 .range-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
 }
 
@@ -614,6 +614,43 @@
   font-weight: 700;
 }
 
+.product-stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.product-stock-status.status-in-stock {
+  background: #e8f7ed;
+  color: #16803a;
+}
+
+.product-stock-status.status-low-stock {
+  background: #fff3d6;
+  color: #b45309;
+}
+
+.product-stock-status.status-high-demand {
+  background: #fff0e8;
+  color: #d9480f;
+}
+
+.product-stock-status.status-out-of-stock {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.product-stock-status.status-currently-unavailable {
+  background: #f1e9e5;
+  color: #6b3b32;
+}
+
 /* Add To Cart & Buy Now CTA Button Group */
 .card-cta-btn-group {
   display: flex;
@@ -651,6 +688,24 @@
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(239, 83, 35, 0.35);
   transform: translateY(-2px);
+}
+
+.btn-add-to-cart:disabled,
+.btn-card-buy-now:disabled {
+  background: #e7e3df;
+  border-color: #e7e3df;
+  box-shadow: none;
+  color: #746b66;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-add-to-cart:disabled:hover,
+.btn-card-buy-now:disabled:hover {
+  background: #e7e3df;
+  box-shadow: none;
+  filter: none;
+  transform: none;
 }
 
 @media (max-width: 640px) {
@@ -823,7 +878,7 @@
   }
 
   .range-products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
   }
 }
@@ -851,7 +906,7 @@
 
   /* ── 2-Column Product Grid Layout on Mobile ── */
   .range-products-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
     max-width: 100% !important;
     margin: 0 !important;

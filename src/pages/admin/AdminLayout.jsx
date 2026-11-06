@@ -1,171 +1,135 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
 import toast from 'react-hot-toast';
+import './AdminPanel.css';
 
-const AdminLayout = ({ children, activeTab, onTabChange }) => {
-  const { user, adminLogout } = useAuth();
+const navigationItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: '▦' },
+  { id: 'analytics', label: 'Analytics', icon: '▥' },
+  { id: 'products', label: 'Products', icon: '◇' },
+  { id: 'categories', label: 'Categories', icon: '◇' },
+  { id: 'inventory', label: 'Inventory', icon: '▤' },
+  { id: 'orders', label: 'Orders', icon: '▣' },
+  { id: 'customers', label: 'Customers', icon: '♙' },
+  { id: 'payments', label: 'Payments', icon: '₹' },
+  { id: 'returns', label: 'Returns', icon: '↶' },
+  { id: 'refunds', label: 'Refunds', icon: '₹' },
+  { id: 'reviews', label: 'Reviews', icon: '☆' },
+  { id: 'banners', label: 'Banners', icon: '▧' },
+  { id: 'notifications', label: 'Notifications', icon: '♧' },
+  { id: 'website-content', label: 'Edit Website Content', icon: '✎' },
+  { id: 'settings', label: 'Settings', icon: '⚙' }
+];
+
+const AdminLayout = ({ children, activeTab, searchQuery, onSearchChange }) => {
+  const { adminUser, adminLogout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [logoutConfirmationOpen, setLogoutConfirmationOpen] = useState(false);
+
+  useEffect(() => {
+    if (!logoutConfirmationOpen) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setLogoutConfirmationOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [logoutConfirmationOpen]);
 
   const handleLogout = () => {
     adminLogout();
     toast.success('Admin logged out successfully');
-    navigate('/admin/login');
+    navigate('/admin/login', { replace: true });
+    setLogoutConfirmationOpen(false);
   };
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'orders', label: 'Orders Management', icon: '📦' },
-    { id: 'inventory', label: 'Products & Stock', icon: '🥜' },
-    { id: 'customers', label: 'Customers', icon: '👥' },
-    { id: 'settings', label: 'System Settings', icon: '⚙️' },
-  ];
+  const handleNavigation = (tab) => {
+    navigate(`/admin/${tab === 'dashboard' ? 'dashboard' : tab}`);
+    setSidebarOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    if (window.matchMedia('(max-width: 1024px)').matches) {
+      setSidebarOpen((open) => !open);
+      return;
+    }
+    setSidebarCollapsed((collapsed) => !collapsed);
+  };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans">
-      
-      {/* Sidebar - Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#111827] border-r border-slate-800 flex flex-col transition-transform duration-300 md:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        
-        {/* Brand Bar */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800">
-          <Link to="/admin/dashboard" className="flex items-center gap-2.5 text-decoration-none">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-black text-white text-base">
-              P
-            </span>
-            <div>
-              <span className="font-black text-white text-base tracking-tight font-['Montserrat'] block">
-                PROTINUT™
-              </span>
-              <span className="text-[10px] text-primary uppercase font-bold tracking-widest block -mt-1">
-                Admin Console
-              </span>
-            </div>
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-slate-400 hover:text-white"
-          >
-            ✕
-          </button>
+    <div className={`admin-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+      {sidebarOpen && <button className="admin-sidebar-scrim" onClick={() => setSidebarOpen(false)} aria-label="Close admin menu" />}
+      <aside className={`admin-sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        <div className="admin-brand">
+          <div className="admin-brand-logo"><img src="/protinut-logo.png" alt="PROTINUT" /></div>
+          <div className="admin-brand-caption"><span>ADMIN PANEL</span></div>
         </div>
-
-        {/* Admin User Mini Card */}
-        <div className="p-4 mx-3 my-3 bg-[#1e293b]/70 rounded-xl border border-slate-800 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary to-amber-500 flex items-center justify-center font-bold text-white text-sm shadow">
-            {user?.name ? user.name.charAt(0) : 'A'}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-xs font-bold text-white truncate">{user?.name || 'Administrator'}</h4>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
-                {user?.role || 'ROLE_ADMIN'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Nav Links */}
-        <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  if (onTabChange) onTabChange(item.id);
-                  setSidebarOpen(false);
-                }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition text-left ${
-                  isActive
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-400 hover:bg-slate-800/80 hover:text-slate-200'
-                }`}
-              >
-                <span className="text-base">{item.icon}</span>
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        <nav className="admin-sidebar-nav" aria-label="Admin navigation">
+          {navigationItems.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              className={`admin-nav-link${activeTab === item.id ? ' is-active' : ''}`}
+              title={sidebarCollapsed ? item.label : undefined}
+              onClick={() => handleNavigation(item.id)}
+            >
+              <span className="admin-nav-icon" aria-hidden="true">{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
         </nav>
-
-        {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-800 space-y-2">
-          <Link
-            to="/"
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold text-slate-300 bg-slate-800/60 hover:bg-slate-800 hover:text-white transition"
-          >
-            <span>🏪 View Public Store</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-900/40 border border-red-900/40 transition cursor-pointer"
-          >
-            <span>🚪 Logout Admin</span>
+        <div className="admin-sidebar-bottom">
+          <div className="admin-sidebar-user">
+            <span className="admin-avatar">{adminUser?.name?.slice(0, 1) || 'A'}</span>
+            <span><strong>{adminUser?.name || 'Admin'}</strong><small>Administrator</small></span>
+          </div>
+          <button type="button" className="admin-logout-button" title={sidebarCollapsed ? 'Logout' : undefined} onClick={() => setLogoutConfirmationOpen(true)}>
+            <span aria-hidden="true">↪</span> Logout
           </button>
         </div>
-
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 md:pl-64 flex flex-col min-w-0">
-        
-        {/* Top Header */}
-        <header className="h-16 bg-[#111827] border-b border-slate-800 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="md:hidden text-slate-400 hover:text-white p-1"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest block">
-                Security Level 1
-              </span>
-              <h2 className="text-sm font-bold text-white capitalize font-['Montserrat']">
-                {activeTab} Overview
-              </h2>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Spring Boot Gateway Active
-            </span>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-xs font-bold text-red-400 hover:text-red-300 bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-800/50 transition"
-            >
-              Logout
-            </button>
+      <div className="admin-main">
+        <header className="admin-topbar">
+          <button type="button" className="admin-menu-toggle" onClick={toggleSidebar} aria-label="Toggle admin sidebar" aria-expanded={!sidebarCollapsed || sidebarOpen}>☰</button>
+          <label className="admin-search">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              placeholder="Search products, orders, customers..."
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+            />
+          </label>
+          <button type="button" className="admin-notification-button" onClick={() => toast('You are all caught up.') } aria-label="Notifications">♧<i /></button>
+          <div className="admin-profile">
+            <span className="admin-avatar">{adminUser?.name?.slice(0, 1) || 'A'}</span>
+            <span>Admin</span>
           </div>
         </header>
-
-        {/* Page Content */}
-        <main className="flex-1 p-4 sm:p-8 bg-[#0b0f19] overflow-y-auto">
-          {children}
-        </main>
-
+        <main className="admin-content">{children}</main>
       </div>
-
+      {logoutConfirmationOpen && (
+        <div
+          className="admin-modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setLogoutConfirmationOpen(false);
+          }}
+        >
+          <section className="admin-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="admin-logout-title">
+            <div className="admin-confirm-icon" aria-hidden="true">↪</div>
+            <h2 id="admin-logout-title">Are you sure you want to logout?</h2>
+            <p>You will need to sign in again to access the Admin Panel.</p>
+            <div className="admin-form-actions">
+              <button type="button" className="admin-button secondary" onClick={() => setLogoutConfirmationOpen(false)}>Cancel</button>
+              <button type="button" className="admin-button danger" onClick={handleLogout}>Yes, logout</button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };

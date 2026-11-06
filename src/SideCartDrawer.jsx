@@ -12,7 +12,6 @@ const SideCartDrawer = ({
   cartItems,
   onUpdateQuantity,
   onRemoveItem,
-  onClearCart,
 }) => {
   const navigate = useNavigate();
 
@@ -255,7 +254,6 @@ const SideCartDrawer = ({
 
     setPlacedOrder(orderData);
     setCurrentStep('success');
-    if (onClearCart) onClearCart();
   };
 
   // Open Unified Premium Tax Invoice Modal
@@ -401,7 +399,10 @@ const SideCartDrawer = ({
                 <button
                   type="button"
                   className="btn-proceed-checkout"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    navigate('/products');
+                  }}
                   style={{ width: 'auto', padding: '10px 24px', display: 'inline-block' }}
                 >
                   Shop Now →

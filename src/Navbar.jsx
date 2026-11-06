@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 import './Navbar.css';
 import logoImg from './assets/protinut-logo.png';
+import { useGlobalSettings } from './GlobalSettingsContext';
 
 const Navbar = ({
   cartCount = 0,
@@ -20,6 +21,7 @@ const Navbar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { settings } = useGlobalSettings();
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -108,6 +110,7 @@ const Navbar = ({
 
   return (
     <header className="protinut-navbar-wrapper">
+      {settings.showOfferBanner && settings.offerBannerText && <div className="navbar-offer-banner">{settings.offerBannerText}</div>}
       <nav className="protinut-navbar">
         <div className="navbar-container">
           
@@ -143,12 +146,12 @@ const Navbar = ({
           ) : (
             <>
               {/* Brand Logo */}
-              <Link to="/" className="navbar-logo" aria-label="PROTINUT Home" onClick={() => setMobileMenuOpen(false)}>
-                <img src={logoImg} alt="PROTINUT™" className="logo-img" />
+              <Link to="/" className="navbar-logo" aria-label={`${settings.companyName} Home`} onClick={() => setMobileMenuOpen(false)}>
+                <img src={logoImg} alt={`${settings.companyName} logo`} className="logo-img" />
               </Link>
 
               {/* Navigation Links (Desktop + Mobile slide-down menu) */}
-              <ul className={`nav-menu ${mobileMenuOpen ? 'mobile-active' : ''}`}>
+              <ul id="primary-navigation" className={`nav-menu ${mobileMenuOpen ? 'mobile-active' : ''}`}>
                 {navLinks.map((item) => (
                   <li key={item.label} className="nav-item">
                     <Link
@@ -261,19 +264,6 @@ const Navbar = ({
                           >
                             ❤️ My Wishlist ({wishlistCount} items)
                           </button>
-                          {user?.role === 'ROLE_ADMIN' && (
-                            <button
-                              type="button"
-                              className="dropdown-item"
-                              style={{ color: '#ef5323', fontWeight: 800 }}
-                              onClick={() => {
-                                setUserMenuOpen(false);
-                                navigate('/admin/dashboard');
-                              }}
-                            >
-                              🛡️ Admin Panel
-                            </button>
-                          )}
                           <div className="dropdown-divider" />
                           <button
                             type="button"
@@ -328,10 +318,23 @@ const Navbar = ({
                   </button>
                 )}
 
+                <button
+                  type="button"
+                  className="action-btn mobile-header-action"
+                  onClick={handleAccountClick}
+                  aria-label={isAuthenticated ? 'Open account' : 'Login to PROTINUT'}
+                  title={isAuthenticated ? 'My account' : 'Login'}
+                >
+                  <svg className="action-icon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </button>
+
                 {/* Shopping Cart Button (Desktop only - mobile opens via BottomNav) */}
                 <button
                   type="button"
-                  className="action-btn badge-btn desktop-only-action"
+                  className="action-btn badge-btn desktop-only-action mobile-header-action"
                   onClick={handleCartClick}
                   aria-label={`Open Cart (${cartCount} items)`}
                   title={`View Cart (${cartCount} items)`}
@@ -380,6 +383,8 @@ const Navbar = ({
                   type="button"
                   className={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
                   aria-label="Toggle navigation"
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="primary-navigation"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                   <span className="bar" />

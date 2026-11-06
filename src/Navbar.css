@@ -13,6 +13,21 @@
   z-index: 1000;
 }
 
+.navbar-offer-banner {
+  min-height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 16px;
+  background: #06452f;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
 .protinut-navbar {
   width: 100%;
   height: 54px;
@@ -110,6 +125,10 @@
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
+}
+
+.mobile-header-action {
+  display: none;
 }
 
 /* Vertical Thin Divider Line */
@@ -393,7 +412,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
   .nav-menu {
     position: absolute;
     top: 54px;
@@ -437,10 +456,19 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1080px) {
   .desktop-only-action {
     display: none !important;
   }
+
+  .desktop-only-action.mobile-header-action {
+    display: flex !important;
+  }
+
+  .mobile-header-action {
+    display: flex;
+  }
+
   .btn-shop-now {
     display: none !important;
   }
@@ -453,6 +481,9 @@
   .logo-img {
     height: 26px;
   }
+  .navbar-logo {
+    min-width: 0;
+  }
   .btn-shop-now {
     padding: 6px 12px;
     font-size: 11px;
@@ -461,7 +492,7 @@
     display: none;
   }
   .navbar-actions {
-    gap: 10px;
+    gap: 8px;
   }
 }
 

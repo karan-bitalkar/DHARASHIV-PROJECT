@@ -20,8 +20,8 @@ const LoginPage = ({ onLoginSuccess, initialMode = 'login' }) => {
         defaultMode={mode}
         onClose={() => navigate(redirectUrl || '/')}
         onLoginSuccess={(user) => {
-          if (onLoginSuccess) onLoginSuccess(user);
-          navigate(redirectUrl, { replace: true });
+          const actionRedirect = onLoginSuccess ? onLoginSuccess(user) : null;
+          navigate(actionRedirect || redirectUrl, { replace: true });
         }}
       />
     </div>

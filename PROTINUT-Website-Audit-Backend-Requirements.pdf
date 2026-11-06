@@ -1,0 +1,1043 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 4911
+>>
+stream
+0.5670000000000001 w
+0 G
+0.19 0.11 0.08 rg
+0. 841.8899999999999864 595.2755905511811534 -175.748031496063021 re
+f
+BT
+/F2 22 Tf
+25.2999999999999972 TL
+1. g
+51.0236220472441033 771.0238582677164914 Td
+(PROTINUT) Tj
+ET
+BT
+/F1 12 Tf
+13.7999999999999989 TL
+1. g
+51.0236220472441033 737.0081102362204319 Td
+(Website Audit & Backend Integration Requirements) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+1. 0.745 0.529 rg
+51.0236220472441033 702.9923622047243725 Td
+(Audit date: 06 November 2026) Tj
+ET
+1. 0.96 0.9 rg
+59.5275590551181182 646.2994488188976447 m
+535.7480314960630494 646.2994488188976447 l
+540.4446262190335801 646.2994488188976447 544.2519685039370643 642.4921065339940469 544.2519685039370643 637.7955118110236299 c
+544.2519685039370643 578.2679527559054122 l
+544.2519685039370643 573.5713580329349952 539.5553737809665336 569.7640157480313974 535.7480314960630494 569.7640157480313974 c
+59.5275590551181182 569.7640157480313974 l
+54.8309643321475875 569.7640157480313974 51.0236220472441033 574.4606104710019281 51.0236220472441033 578.2679527559054122 c
+51.0236220472441033 637.7955118110236299 l
+51.0236220472441033 642.4921065339940469 55.7202167702146269 646.2994488188976447 59.5275590551181182 646.2994488188976447 c
+h
+f
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.576 0.247 0.071 rg
+65.1968503937007995 623.6222834645668627 Td
+(PROJECT STATUS: FRONTEND PROTOTYPE - NOT PRODUCTION COMPLETE) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.267 0.216 0.184 rg
+65.1968503937007995 600.9451181102361943 Td
+(The customer storefront and admin UI are implemented, but real authentication, durable shared data, payment) Tj
+T* (processing, fulfillment, and messaging require backend/provider connections.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 538.5829133858267141 Td
+(Executive summary) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 515.9057480314959321 Td
+(This review inspected the React/Vite frontend, routes, state contexts, checkout, admin screens, and project scripts.) Tj
+T* (The app builds successfully. No backend server, API client, environment configuration, or automated test suite is) Tj
+T* (present in this repository. Most business data currently lives in browser localStorage, which is suitable for a local) Tj
+T* (prototype but not for a live store or cross-device administration.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 454.1104724409448181 Td
+(Already implemented in the frontend) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 431.4333070866140929 Td
+(Storefront) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 431.4333070866140929 Td
+(Responsive product catalog and detail pages, search/filter UI, cart and wishlist, account) Tj
+T* (screens, order views, invoices, and content pages.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 399.6852755905511003 Td
+(Admin) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 399.6852755905511003 Td
+(Protected-route UI, product/customer/order/content management screens, analytics panels,) Tj
+T* (banners, status controls, and responsive layouts.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 367.9372440944881646 Td
+(Shared state) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 367.9372440944881646 Td
+(Product pricing/availability, settings, cart, and orders are wired through React contexts; local) Tj
+T* (changes can update views in this browser.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 336.189212598425172 Td
+(Recent fixes) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 336.189212598425172 Td
+(New orders now start as Order Placed with later timeline steps incomplete. Checkout, order) Tj
+T* (history, success, and order details now require sign-in, with login redirect support.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 304.4411811023621794 Td
+(Important qualification) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 281.7640157480315111 Td
+(The admin gate and customer login are frontend simulations. A route guard or token stored in localStorage is not a) Tj
+T* (security boundary. Do not publish this build as a production store or accept real payments until the server-side items) Tj
+T* (below are implemented. The dummy admin credentials are intentionally not repeated in this report.) Tj
+ET
+0.88 0.84 0.8 RG
+51.0236220472441033 42.5199212598424126 m
+544.2519685039370643 42.5199212598424126 l
+S
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+51.0236220472441033 25.5120472440943331 Td
+(PROTINUT Website Audit | 06 Nov 2026) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+519.1319685039370597 25.5120472440943331 Td
+(Page 4) Tj
+ET
+endstream
+endobj
+5 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 4938
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 785.1970866141732586 Td
+(Audit findings and remaining gaps) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 762.5199212598424765 Td
+(BLOCKER - Identity) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 762.5199212598424765 Td
+(Customer sign-in/registration currently simulates success in the browser. The admin demo) Tj
+T* (credential check and token creation are also client-side. A visitor can alter browser state;) Tj
+T* (enforce identity and roles on a server.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 717.7325196850393922 Td
+(BLOCKER - Persistence) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 717.7325196850393922 Td
+(Products, customers, orders, global settings, cart, and other data are saved in localStorage.) Tj
+T* (Data is per browser, can be edited/deleted by the user, and does not provide authoritative) Tj
+T* (inventory or multi-admin synchronization.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 672.9451181102361943 Td
+(BLOCKER - Payments) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 672.9451181102361943 Td
+(Online checkout uses a test simulator with manual success/failure buttons. There is no) Tj
+T* (provider order creation, signed server verification, webhook reconciliation, or refund) Tj
+T* (integration. The current COD flow also does not create an order through a server.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 628.15771653543311 Td
+(HIGH - Fulfillment) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 628.15771653543311 Td
+(Order statuses and tracking IDs are edited in local state. No courier booking, label generation,) Tj
+T* (shipment tracking events, stock reservation, or dispatch notification is connected.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 596.4096850393700606 Td
+(HIGH - Messaging) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 596.4096850393700606 Td
+(Contact form success is only a local UI state; no support inbox/email service receives the) Tj
+T* (message. Order/auth emails and SMS/OTP are not connected.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 564.6616535433070112 Td
+(HIGH - Reviews) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 564.6616535433070112 Td
+(Review samples are static frontend data; submitting/voting updates component state only. The) Tj
+T* (client can claim a review is verified without server-side purchase validation or moderation.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 532.9136220472440755 Td
+(HIGH - Business correctness) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 532.9136220472440755 Td
+(Server-side price/tax/stock calculation and order idempotency are missing. The backend must) Tj
+T* (recalculate totals rather than trust client-sent prices, GST, stock, or payment status.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 501.1655905511810261 Td
+(MEDIUM - Media/content) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 501.1655905511810261 Td
+(Admin banners/product images and website settings are browser-managed. Use authenticated) Tj
+T* (upload to object storage/CDN and persist published content in the database.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 469.4175590551180335 Td
+(MEDIUM - Release readiness) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 469.4175590551180335 Td
+(The project defines a production build but no test/lint scripts or automated regression tests.) Tj
+T* (The build has a large JavaScript chunk warning; add CI checks and monitor bundle size.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 437.6695275590550978 Td
+(What was validated) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 414.9923622047243725 Td
+(The production Vite build completed and git diff --check passed during the audit. Browser checks previously covered) Tj
+T* (mobile drawer/modal layouts and the responsive admin table. The authenticated order flow and generated invoice) Tj
+T* (were not end-to-end tested against a server because none is present.) Tj
+ET
+0.88 0.84 0.8 RG
+51.0236220472441033 42.5199212598424126 m
+544.2519685039370643 42.5199212598424126 l
+S
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+51.0236220472441033 25.5120472440943331 Td
+(PROTINUT Website Audit | 06 Nov 2026) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+519.1319685039370597 25.5120472440943331 Td
+(Page 4) Tj
+ET
+endstream
+endobj
+7 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 8 0 R
+>>
+endobj
+8 0 obj
+<<
+/Length 5272
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 785.1970866141732586 Td
+(Backend services and API surface needed) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 762.5199212598424765 Td
+(A REST API over HTTPS is sufficient. Keep the frontend framework independent of the chosen backend. The) Tj
+T* (following endpoint names are illustrative contracts, not existing routes. All admin endpoints must enforce server-side) Tj
+T* (admin roles.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 714.0474803149605805 Td
+(Identity) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 714.0474803149605805 Td
+(POST /api/v1/auth/register, /login, /refresh, /logout, /password/forgot, /password/reset; GET) Tj
+T* (/api/v1/me. Separate admin login/session or shared auth with strict RBAC. Hash passwords) Tj
+T* (using a modern password hash; use secure session/refresh-token handling and rate limits.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 669.2600787401574962 Td
+(Catalog & inventory) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 669.2600787401574962 Td
+(GET /api/v1/products and /products/{id}; admin POST/PATCH/DELETE /api/v1/admin/products;) Tj
+T* (categories and inventory endpoints. Validate SKU, price, discounts, stock status, and image) Tj
+T* (upload server-side.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 624.4726771653542983 Td
+(Checkout & orders) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 624.4726771653542983 Td
+(POST /api/v1/orders/quote to recalculate items, availability, discounts, GST, delivery and) Tj
+T* (totals; POST /api/v1/orders with idempotency key; customer GET /api/v1/me/orders and) Tj
+T* (/orders/{id}; POST cancellation; admin GET /api/v1/admin/orders and PATCH /{id}/status with) Tj
+T* (tracking details.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 566.6459055118109518 Td
+(Payments) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 566.6459055118109518 Td
+(POST /api/v1/payments/create for a provider intent/order; POST /api/v1/payments/{id}/verify;) Tj
+T* (signed provider webhook endpoint; admin refund endpoint. Never accept a client callback) Tj
+T* (alone as proof of payment. Keep secret keys only in server environment variables.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 521.8585039370078675 Td
+(Customers & admin) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 521.8585039370078675 Td
+(Admin customer list/detail/create/update/disable endpoints. Store account credentials) Tj
+T* (separately from customer profile data; never return password hashes in customer APIs. Audit) Tj
+T* (sensitive admin actions.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 477.0711023622047264 Td
+(Content & media) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 477.0711023622047264 Td
+(GET public /api/v1/content/settings and /banners; authenticated admin PATCH) Tj
+T* (/api/v1/admin/content/settings and CRUD /banners. POST /api/v1/admin/uploads should issue) Tj
+T* (safe object-storage uploads and return CDN URLs.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 432.2837007874015285 Td
+(Reviews & support) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 432.2837007874015285 Td
+(GET /api/v1/products/{id}/reviews; authenticated POST review; admin moderation endpoints.) Tj
+T* (POST /api/v1/contact-messages must persist and notify a support inbox. Add spam/rate) Tj
+T* (limiting.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 387.4962992125983305 Td
+(Notifications & invoices) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 387.4962992125983305 Td
+(Queue order-confirmation, shipment, delivery, cancellation, refund and password-reset) Tj
+T* (email/SMS. Generate invoice from authoritative order/tax data and expose an authenticated) Tj
+T* (download endpoint.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 342.7088976377951326 Td
+(Suggested production data model) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 320.0317322834644074 Td
+(Users and roles; addresses; products/variants/SKUs; inventory movements; carts or checkout quotes; orders and) Tj
+T* (immutable order items; payment attempts and refunds; shipment/tracking events; coupons/promotions; reviews and) Tj
+T* (moderation; site settings/banners/media; contact messages; notification jobs; and admin audit events. Use database) Tj
+T* (transactions for stock reservation and order/payment transitions.) Tj
+ET
+0.88 0.84 0.8 RG
+51.0236220472441033 42.5199212598424126 m
+544.2519685039370643 42.5199212598424126 l
+S
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+51.0236220472441033 25.5120472440943331 Td
+(PROTINUT Website Audit | 06 Nov 2026) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+519.1319685039370597 25.5120472440943331 Td
+(Page 4) Tj
+ET
+endstream
+endobj
+9 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Length 5448
+>>
+stream
+0.5670000000000001 w
+0 G
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 785.1970866141732586 Td
+(Recommended delivery order) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 762.5199212598424765 Td
+(1. Decide) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 762.5199212598424765 Td
+(Confirm backend stack/hosting, database, payment gateway, courier provider, email/SMS) Tj
+T* (service, and who owns deployment/provider accounts.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 730.7718897637795408 Td
+(2. Foundation) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 730.7718897637795408 Td
+(Create API, database migrations, environments, server-side customer/admin auth, roles, input) Tj
+T* (validation, logging, backups, and CORS/HTTPS setup.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 699.0238582677164914 Td
+(3. Store) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 699.0238582677164914 Td
+(Connect catalog, admin CRUD, uploads, inventory, promotions and shared content; remove) Tj
+T* (localStorage as the source of truth.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 667.2758267716535556 Td
+(4. Checkout) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 667.2758267716535556 Td
+(Implement server quote/order flow, payment integration/webhooks and COD orders; reconcile) Tj
+T* (inventory and add refunds/cancellation rules.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 635.5277952755905062 Td
+(5. Operations) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 635.5277952755905062 Td
+(Connect courier/tracking, email/SMS, support messages, review moderation, and invoice) Tj
+T* (generation.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 603.7797637795274568 Td
+(6. Launch checks) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 603.7797637795274568 Td
+(Automated tests for customer/admin permissions, pricing/tax, stock, payment) Tj
+T* (failures/webhooks, order transitions, responsive routes; staging/UAT; security review;) Tj
+T* (production monitoring.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 558.9923622047242588 Td
+(Decisions needed from the owner) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 536.3151968503937042 Td
+(Please reply with your preferences so implementation can proceed without guessing. Do not paste API secrets,) Tj
+T* (passwords, private keys, or payment credentials in chat; configure secrets in the deployment environment.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 501.1655905511810261 Td
+(Backend) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 501.1655905511810261 Td
+(Is there already a backend/API? If yes, share its base URL \(non-secret\) and API) Tj
+T* (documentation. Otherwise choose Spring Boot, Node.js \(Express/NestJS\), or specify another) Tj
+T* (stack.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 456.3781889763778281 Td
+(Database) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 456.3781889763778281 Td
+(Choose PostgreSQL \(recommended for orders/payments\) or tell us your existing database.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 436.5356692913384222 Td
+(Payments) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 436.5356692913384222 Td
+(Choose Razorpay, Stripe, COD-only at launch, or another provider. India-first stores commonly) Tj
+T* (use Razorpay; provider account/KYC is required.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 404.7876377952754865 Td
+(Shipping) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 404.7876377952754865 Td
+(Choose Shiprocket, another courier aggregator, direct courier API, or manual) Tj
+T* (dispatch/tracking.) Tj
+ET
+BT
+/F2 9.2 Tf
+10.5799999999999983 TL
+0.843 0.357 0.094 rg
+51.0236220472441033 373.0396062992124939 Td
+(Notifications) Tj
+ET
+BT
+/F1 9.2 Tf
+10.5799999999999983 TL
+0.216 g
+119.0551181102362364 373.0396062992124939 Td
+(Choose email and SMS/WhatsApp providers, or confirm email-only initially; provider/domain) Tj
+T* (verification may be required.) Tj
+ET
+BT
+/F2 15 Tf
+17.25 TL
+0.239 0.137 0.082 rg
+51.0236220472441033 341.2915748031495582 Td
+(Completion definition) Tj
+ET
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.216 g
+51.0236220472441033 318.614409448818833 Td
+(The frontend audit and listed UI corrections are complete, but the overall commerce project is not) Tj
+T* (production-complete until the backend and provider integrations above are connected and tested in a staging) Tj
+T* (environment. This PDF is a handoff/checklist, not proof of live payment or backend readiness.) Tj
+ET
+0.88 0.84 0.8 RG
+51.0236220472441033 42.5199212598424126 m
+544.2519685039370643 42.5199212598424126 l
+S
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+51.0236220472441033 25.5120472440943331 Td
+(PROTINUT Website Audit | 06 Nov 2026) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.471 0.431 0.392 rg
+519.1319685039370597 25.5120472440943331 Td
+(Page 4) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R 5 0 R 7 0 R 9 0 R ]
+/Count 4
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+19 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+20 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+21 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+22 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+23 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+24 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 11 0 R
+/F2 12 0 R
+/F3 13 0 R
+/F4 14 0 R
+/F5 15 0 R
+/F6 16 0 R
+/F7 17 0 R
+/F8 18 0 R
+/F9 19 0 R
+/F10 20 0 R
+/F11 21 0 R
+/F12 22 0 R
+/F13 23 0 R
+/F14 24 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+25 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/Title (PROTINUT Website Audit and Backend Integration Requirements)
+/Subject (Frontend audit and backend integration checklist)
+/Author (PROTINUT Project Audit)
+/CreationDate (D:20261106122150+05'30')
+>>
+endobj
+26 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 27
+0000000000 65535 f 
+0000021342 00000 n 
+0000023182 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000005115 00000 n 
+0000005252 00000 n 
+0000010242 00000 n 
+0000010379 00000 n 
+0000015703 00000 n 
+0000015841 00000 n 
+0000021417 00000 n 
+0000021543 00000 n 
+0000021674 00000 n 
+0000021808 00000 n 
+0000021946 00000 n 
+0000022070 00000 n 
+0000022199 00000 n 
+0000022331 00000 n 
+0000022467 00000 n 
+0000022595 00000 n 
+0000022722 00000 n 
+0000022851 00000 n 
+0000022984 00000 n 
+0000023086 00000 n 
+0000023435 00000 n 
+0000023683 00000 n 
+trailer
+<<
+/Size 27
+/Root 26 0 R
+/Info 25 0 R
+/ID [ <EA2704299A873D44F096546B428E803B> <EA2704299A873D44F096546B428E803B> ]
+>>
+startxref
+23787
+%%EOF

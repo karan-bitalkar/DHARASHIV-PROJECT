@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getProductStockStatus, getStockStatusClass, isProductPurchasable } from './productAvailability';
 import './ProductModal.css';
 
 const ProductModal = ({
@@ -16,7 +17,8 @@ const ProductModal = ({
 
   if (!product) return null;
 
-  const isAvailable = product.isAvailable !== false;
+  const stockStatus = getProductStockStatus(product);
+  const isAvailable = isProductPurchasable(product);
   const currentPrice = selectedWeight === '1kg' 
     ? Math.round(product.price * 1.8) 
     : product.price;
@@ -94,8 +96,8 @@ const ProductModal = ({
                 alt={product.name}
                 className="modal-product-img"
               />
-              <span className={`modal-status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
-                {isAvailable ? 'In Stock' : 'Currently Not Available'}
+              <span className={`modal-status-badge ${isAvailable ? 'available' : 'unavailable'} status-${getStockStatusClass(stockStatus)}`}>
+                {stockStatus}
               </span>
             </div>
 
@@ -194,13 +196,13 @@ const ProductModal = ({
                   type="button"
                   className="modal-btn-cart"
                   onClick={() => {
-                    onAddToCart({
+                    const added = onAddToCart({
                       ...product,
                       selectedWeight,
                       quantity,
                       finalPrice: currentPrice
                     });
-                    onClose();
+                    if (added !== false) onClose();
                   }}
                 >
                   🛒 Add to Cart • ₹{currentPrice * quantity}

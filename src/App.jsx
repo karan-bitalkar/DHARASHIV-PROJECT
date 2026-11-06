@@ -4,6 +4,9 @@ import { Toaster, toast } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './AuthContext';
 import { CartProvider, useCart } from './CartContext';
 import { OrderProvider, useOrders } from './OrderContext';
+import { AdminStoreProvider, useAdminStore } from './AdminStoreContext';
+import { GlobalSettingsProvider } from './GlobalSettingsContext';
+import { getProductStockStatus, isProductPurchasable } from './productAvailability';
 import ProtectedRoute from './ProtectedRoute';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -14,6 +17,7 @@ import AuthModal from './AuthModal';
 import InvoiceModal from './InvoiceModal';
 import BottomNav from './BottomNav';
 import { initialWishlistProducts } from './wishlistData';
+import { allProductsData } from './OurRange';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -32,26 +36,28 @@ import WishlistPage from './pages/WishlistPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import AccountPage from './pages/AccountPage';
+const TrackingPage = React.lazy(() => import('./pages/TrackingPage'));
 import AdminProtectedRoute from './AdminProtectedRoute';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 
 function AppContent() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { products } = useAdminStore();
   const {
     cartItems,
     totalCartCount,
     addToCart: contextAddToCart,
     updateQuantity,
-    removeItem,
-    clearCart
+    removeItem
   } = useCart();
   const { orders } = useOrders();
 
   const navigate = useNavigate();
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
-  const hideHeaderFooter = isAdminRoute;
+  const isTrackingRoute = location.pathname.startsWith('/track-order/');
+  const hideHeaderFooter = isAdminRoute || isTrackingRoute;
 
   const [activeModalProduct, setActiveModalProduct] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -85,6 +91,10 @@ function AppContent() {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const authParam = params.get('auth');
+    if (['/login', '/register', '/signup'].includes(location.pathname)) {
+      setIsAuthOpen(false);
+      return;
+    }
     if (authParam === 'login' || location.pathname === '/login') {
       setIsAuthOpen(true);
       setAuthModalMode('login');
@@ -132,26 +142,33 @@ function AppContent() {
     }
   }, [wishlistItems]);
 
-  // ── Wishlist Handlers (Add / Remove toggle with Auth Check) ──
-  const handleToggleWishlist = (product) => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to your wishlist', {
-        id: 'auth-wishlist-action-toast',
-        duration: 3500,
-        style: {
-          background: '#2b1810',
-          color: '#ffffff',
-          borderRadius: '12px',
-          border: '1.5px solid #ef5323',
-          fontFamily: "'Montserrat', sans-serif",
-          fontSize: '13px',
-          fontWeight: 700
-        }
-      });
-      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
-      return false;
-    }
+  React.useEffect(() => {
+    setWishlistItems((currentItems) => {
+      let changed = false;
+      const updatedItems = currentItems.map((item) => {
+        const product = products.find((currentProduct) => currentProduct.id === item.id);
+        if (!product) return item;
 
+        const stockStatus = getProductStockStatus(product);
+        const inStock = isProductPurchasable(product);
+        if (item.stockStatus === stockStatus && item.inStock === inStock) return item;
+        changed = true;
+        return { ...item, stockStatus, inStock, isAvailable: inStock, isOutOfStock: !inStock };
+      });
+      return changed ? updatedItems : currentItems;
+    });
+  }, [products]);
+
+  const queuePendingAction = (action) => {
+    setPendingAction(action);
+    try {
+      sessionStorage.setItem('protinut_pending_action', JSON.stringify(action));
+    } catch (error) {
+      console.error('Unable to save the pending customer action', error);
+    }
+  };
+
+  const toggleWishlistState = (product) => {
     setWishlistItems((prev) => {
       const exists = prev.some((item) => item.id === product.id);
       if (exists) {
@@ -166,35 +183,64 @@ function AppContent() {
           }
         });
         return prev.filter((item) => item.id !== product.id);
-      } else {
-        toast.success(`❤️ Added ${product.name} to Wishlist!`, {
-          style: {
-            background: '#15803d',
-            color: '#ffffff',
-            borderRadius: '12px',
-            fontFamily: "'Montserrat', sans-serif",
-            fontSize: '13px',
-            fontWeight: 700
-          }
-        });
-        return [
-          {
-            id: product.id,
-            name: product.name,
-            weight: product.weight || product.selectedWeight || '550gm',
-            price: product.price || product.finalPrice || 250,
-            originalPrice: product.originalPrice || Math.round((product.price || 250) * 1.35),
-            image: product.image || '/products/classy-crunch.png',
-            rating: product.rating || 4.8,
-            reviewsCount: product.reviewsCount || 280,
-            tag: product.tag || 'Bestseller',
-            inStock: product.inStock !== false && product.isOutOfStock !== true && product.isAvailable !== false,
-            isOutOfStock: product.isOutOfStock || product.isAvailable === false
-          },
-          ...prev
-        ];
       }
+      toast.success(`❤️ Added ${product.name} to Wishlist!`, {
+        style: {
+          background: '#15803d',
+          color: '#ffffff',
+          borderRadius: '12px',
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: '13px',
+          fontWeight: 700
+        }
+      });
+      const managedProduct = products.find((currentProduct) => currentProduct.id === product.id) || product;
+      const stockStatus = getProductStockStatus(managedProduct);
+      const inStock = isProductPurchasable(managedProduct);
+      return [
+        {
+          id: product.id,
+          name: product.name,
+          weight: product.weight || product.selectedWeight || '550gm',
+          price: product.price || product.finalPrice || 250,
+          originalPrice: product.originalPrice || Math.round((product.price || 250) * 1.35),
+          image: product.image || '/products/classy-crunch.png',
+          rating: product.rating || 4.8,
+          reviewsCount: product.reviewsCount || 280,
+          tag: product.tag || 'Bestseller',
+          stockStatus,
+          inStock,
+          isAvailable: inStock,
+          isOutOfStock: !inStock
+        },
+        ...prev
+      ];
     });
+  };
+
+  // ── Wishlist Handlers (Add / Remove toggle with Auth Check) ──
+  const handleToggleWishlist = (product) => {
+    if (!isAuthenticated) {
+      setActiveModalProduct(null);
+      toast.error('Please login or register to use your wishlist', {
+        id: 'auth-wishlist-action-toast',
+        duration: 3500,
+        style: {
+          background: '#2b1810',
+          color: '#ffffff',
+          borderRadius: '12px',
+          border: '1.5px solid #ef5323',
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: '13px',
+          fontWeight: 700
+        }
+      });
+      queuePendingAction({ type: 'TOGGLE_WISHLIST', product });
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return false;
+    }
+
+    toggleWishlistState(product);
     return true;
   };
 
@@ -206,7 +252,7 @@ function AppContent() {
     setWishlistItems([]);
   };
 
-  // ── Centralized Login Success Handler (Fulfills pending Add to Cart or Buy Now) ──
+  // ── Centralized Login Success Handler (Fulfills the action that required sign-in) ──
   const handleLoginSuccess = (loggedInUser) => {
     setIsAuthOpen(false);
     const displayName = loggedInUser?.name || 'Customer';
@@ -230,27 +276,56 @@ function AppContent() {
         contextAddToCart(prod, qty, weight);
       } else if (pendingAction.type === 'BUY_NOW') {
         const prod = pendingAction.product;
+        const managedProduct = products.find((product) => product.id === prod.id) || prod;
+        if (!isProductPurchasable(managedProduct)) {
+          toast.error(`${managedProduct.name} is currently unavailable.`);
+          setPendingAction(null);
+          return null;
+        }
         try {
           sessionStorage.setItem('protinut_buy_now_item', JSON.stringify(prod));
-        } catch (e) {}
-        navigate('/checkout', {
-          state: { buyNowItem: prod }
-        });
+        } catch (error) {
+          console.error('Unable to save the pending purchase', error);
+        }
+        setPendingAction(null);
+        navigate('/checkout', { state: { buyNowItem: prod } });
+        return;
+      } else if (pendingAction.type === 'TOGGLE_WISHLIST') {
+        toggleWishlistState(pendingAction.product);
       }
       setPendingAction(null);
     }
+
+    const redirect = new URLSearchParams(location.search).get('redirect');
+    if (redirect?.startsWith('/') && !redirect.startsWith('//')) {
+      navigate(redirect, { replace: true });
+    }
+    return null;
   };
 
-  // ── 1. Add to Cart (Direct addition to cart; seamless for all users) ──
+  // ── 1. Add to Cart (Sign-in required) ──
   const handleAddToCart = (product) => {
+    if (!isAuthenticated) {
+      setActiveModalProduct(null);
+      queuePendingAction({ type: 'ADD_TO_CART', product });
+      toast('Please login or register to add items to your cart.', { icon: '🔒' });
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return false;
+    }
     const qty = product.quantity || 1;
     const weight = product.selectedWeight || '550gm';
     const success = contextAddToCart(product, qty, weight);
     return success;
   };
 
-  // ── 2. Buy Now Direct Purchase (Passes product directly to /checkout) ──
+  // ── 2. Buy Now (Sign-in required before checkout) ──
   const handleBuyNow = (product) => {
+    const managedProduct = products.find((currentProduct) => currentProduct.id === product.id) || product;
+    if (!isProductPurchasable(managedProduct)) {
+      toast.error(`${managedProduct.name} is currently unavailable.`);
+      return false;
+    }
+
     const buyNowData = {
       id: product.id,
       name: product.name,
@@ -261,9 +336,19 @@ function AppContent() {
       image: product.image
     };
 
+    if (!isAuthenticated) {
+      setActiveModalProduct(null);
+      queuePendingAction({ type: 'BUY_NOW', product: buyNowData });
+      toast('Please login or register before checkout.', { icon: '🔒' });
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+      return false;
+    }
+
     try {
       sessionStorage.setItem('protinut_buy_now_item', JSON.stringify(buyNowData));
-    } catch (e) {}
+    } catch (error) {
+      console.error('Unable to save the purchase before checkout', error);
+    }
 
     navigate('/checkout', {
       state: { buyNowItem: buyNowData }
@@ -450,22 +535,47 @@ function AppContent() {
 
           <Route
             path="/checkout"
-            element={<CheckoutPage />}
+            element={
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/order-success"
-            element={<OrderSuccessPage />}
+            element={
+              <ProtectedRoute>
+                <OrderSuccessPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/orders"
-            element={<OrdersPage />}
+            element={
+              <ProtectedRoute>
+                <OrdersPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/orders/:orderId"
-            element={<OrderDetailPage />}
+            element={
+              <ProtectedRoute>
+                <OrderDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/track-order/:orderId"
+            element={
+              <React.Suspense fallback={<div className="min-h-screen bg-[#F8F3E8]" />}>
+                <TrackingPage />
+              </React.Suspense>
+            }
           />
 
           <Route
@@ -566,7 +676,6 @@ function AppContent() {
           cartItems={cartItems}
           onUpdateQuantity={updateQuantity}
           onRemoveItem={removeItem}
-          onClearCart={clearCart}
         />
       )}
 
@@ -623,15 +732,19 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
+    <GlobalSettingsProvider>
+      <AuthProvider>
         <OrderProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <AdminStoreProvider initialProducts={allProductsData}>
+            <CartProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </CartProvider>
+          </AdminStoreProvider>
         </OrderProvider>
-      </CartProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </GlobalSettingsProvider>
   );
 }
 

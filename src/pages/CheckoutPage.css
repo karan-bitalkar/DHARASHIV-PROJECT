@@ -1255,3 +1255,62 @@
     padding-left: 0;
   }
 }
+
+@media (max-width: 640px) {
+  .checkout-page-wrapper {
+    padding: 14px 10px 150px;
+  }
+
+  .checkout-stepper-container {
+    padding: 12px 8px;
+  }
+
+  .checkout-stepper {
+    gap: 6px;
+  }
+
+  .step-node {
+    gap: 5px;
+  }
+
+  .step-title {
+    font-size: 11px;
+  }
+
+  .step-line {
+    width: min(7vw, 28px);
+  }
+
+  .checkout-card {
+    padding: 16px 14px;
+  }
+
+  .card-row-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .upi-id-input-wrap {
+    flex-direction: column;
+  }
+
+  .checkout-place-order-bar {
+    position: fixed;
+    z-index: 9980;
+    right: 0;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid #e1e4e8;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .checkout-place-order-bar > [role='alert'] {
+    margin: 0;
+  }
+
+  .checkout-place-order-bar button {
+    width: 100%;
+  }
+}

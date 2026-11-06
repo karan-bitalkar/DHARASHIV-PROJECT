@@ -15,6 +15,44 @@
   padding: 0 24px;
 }
 
+.product-global-policy {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 28px 0 12px;
+  padding: 22px 26px;
+  border: 1.5px solid #d5e8dc;
+  border-radius: 14px;
+  background: #f5fbf7;
+}
+
+.product-global-policy p {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.product-global-policy h2 {
+  margin: 0 0 8px;
+  color: #06452f;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.product-global-policy.product-manufacturer-info {
+  display: block;
+  margin-top: 14px;
+  background: #fff;
+}
+
+.product-global-policy.product-policy-copy {
+  display: block;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
 /* Breadcrumb */
 .detail-breadcrumb-strip {
   background: #fffcf8;
@@ -226,6 +264,47 @@
   border: 1.5px solid #ebdcd0;
   border-radius: 18px;
   padding: 18px 22px;
+}
+
+.detail-pricing-box .product-stock-status {
+  margin-bottom: 8px;
+}
+
+.product-stock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.product-stock-status.status-in-stock {
+  background: #e8f7ed;
+  color: #16803a;
+}
+
+.product-stock-status.status-low-stock {
+  background: #fff3d6;
+  color: #b45309;
+}
+
+.product-stock-status.status-high-demand {
+  background: #fff0e8;
+  color: #d9480f;
+}
+
+.product-stock-status.status-out-of-stock {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.product-stock-status.status-currently-unavailable {
+  background: #f1e9e5;
+  color: #6b3b32;
 }
 
 .price-row {
@@ -440,6 +519,16 @@
   transform: translateY(-2px);
 }
 
+.btn-detail-add-cart:disabled,
+.btn-detail-buy-now:disabled {
+  background: #e7e3df;
+  border-color: #e7e3df;
+  box-shadow: none;
+  color: #746b66;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-detail-wishlist {
   width: 48px;
   height: 48px;
@@ -504,8 +593,21 @@
 }
 
 @media (max-width: 640px) {
+  .detail-container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .main-hero-grid {
+    gap: 24px;
+    padding-top: 24px;
+    padding-bottom: 36px;
+  }
+
   .detail-main-image-stage {
-    height: 320px;
+    height: min(82vw, 360px);
+    min-height: 240px;
+    border-radius: 18px;
   }
 
   .weight-buttons-group {

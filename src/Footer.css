@@ -250,17 +250,60 @@
   }
 }
 
-@media (max-width: 768px) {
-  .protinut-footer {
-    display: none !important;
-  }
-}
-
 @media (max-width: 600px) {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 30px;
   }
+
+  .footer-main-container {
+    padding: 38px 20px 24px;
+  }
+
+  .footer-col,
+  .footer-col p,
+  .footer-col h4,
+  .footer-tagline,
+  .footer-badges {
+    text-align: center;
+  }
+
+  .footer-badges {
+    justify-content: center;
+  }
+
+  .brand-col > a {
+    display: inline-block;
+  }
+
+  .fssai-stamp {
+    align-items: center;
+  }
+
+  .footer-bottom {
+    padding: 20px 16px 76px;
+  }
+
+  .footer-legal {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .newsletter-input-box {
+    border-radius: 14px;
+    padding: 6px;
+  }
+
+  .newsletter-input-box input {
+    min-width: 0;
+    padding-left: 8px;
+  }
+
+  .newsletter-input-box button {
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;

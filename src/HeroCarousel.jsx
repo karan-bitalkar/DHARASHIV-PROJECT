@@ -1,27 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './HeroCarousel.css';
-
-// ─────────────────────────────────────────────
-// ADD MORE SLIDES HERE as you send more images
-// Just keep adding: { src: '/hero-slides/slide-XX.png', alt: '...' }
-// ─────────────────────────────────────────────
-const slides = [
-  { src: '/hero-slides/slide-16.png', alt: 'Make Your Breakfast Healthy & Tasty - Fresh Bowl' },
-  { src: '/hero-slides/slide-28.png', alt: 'Fuel Your Day, Power Your Way - Shop Now Both Jars' },
-  { src: '/hero-slides/slide-30.png', alt: 'Real Peanuts. Real Nutrition. - Explore Products' },
-];
+import { useGlobalSettings } from './GlobalSettingsContext';
 
 const AUTO_PLAY_INTERVAL = 3500; // ms (Flipkart uses ~3.5s)
 
 const HeroCarousel = () => {
+  const { settings } = useGlobalSettings();
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
+  const slides = (settings.heroBanners || []).filter((banner) => banner.active !== false);
   const total = slides.length;
 
   const goTo = useCallback((index) => {
-    if (isTransitioning) return;
+    if (isTransitioning || total < 2) return;
     setIsTransitioning(true);
     setCurrent((index + total) % total);
     setTimeout(() => setIsTransitioning(false), 500);
@@ -29,6 +22,10 @@ const HeroCarousel = () => {
 
   const goNext = useCallback(() => goTo(current + 1), [current, goTo]);
   const goPrev = useCallback(() => goTo(current - 1), [current, goTo]);
+
+  useEffect(() => {
+    setCurrent((index) => Math.min(index, Math.max(0, total - 1)));
+  }, [total]);
 
   // Auto-play timer
   useEffect(() => {
@@ -56,6 +53,8 @@ const HeroCarousel = () => {
     if (Math.abs(diff) > 40) diff > 0 ? goNext() : goPrev();
     touchStartX.current = null;
   };
+
+  if (!settings.showHeroBanner || total === 0) return null;
 
   return (
     <section
@@ -90,6 +89,12 @@ const HeroCarousel = () => {
                 draggable={false}
               />
             </div>
+            {i === current && (settings.homeHeroHeading || settings.homeHeroSubtitle) && (
+              <div className="hero-cms-copy">
+                <h1>{settings.homeHeroHeading}</h1>
+                <p>{settings.homeHeroSubtitle}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -100,7 +105,7 @@ const HeroCarousel = () => {
       </div>
 
       {/* ── Left Arrow ── */}
-      <button
+      {total > 1 && <button
         className="carousel-arrow arrow-left"
         onClick={goPrev}
         aria-label="Previous slide"
@@ -108,10 +113,10 @@ const HeroCarousel = () => {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="15 18 9 12 15 6" />
         </svg>
-      </button>
+      </button>}
 
       {/* ── Right Arrow ── */}
-      <button
+      {total > 1 && <button
         className="carousel-arrow arrow-right"
         onClick={goNext}
         aria-label="Next slide"
@@ -119,10 +124,10 @@ const HeroCarousel = () => {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="9 18 15 12 9 6" />
         </svg>
-      </button>
+      </button>}
 
       {/* ── Dot Indicators ── */}
-      <div className="carousel-dots" role="tablist" aria-label="Slide indicators">
+      {total > 1 && <div className="carousel-dots" role="tablist" aria-label="Slide indicators">
         {slides.map((_, i) => (
           <button
             key={i}
@@ -133,10 +138,10 @@ const HeroCarousel = () => {
             onClick={() => goTo(i)}
           />
         ))}
-      </div>
+      </div>}
 
       {/* ── Progress Bar (like Flipkart) ── */}
-      {!isPaused && (
+      {!isPaused && total > 1 && (
         <div className="carousel-progress-bar" key={current}>
           <div className="progress-fill" style={{ animationDuration: `${AUTO_PLAY_INTERVAL}ms` }} />
         </div>

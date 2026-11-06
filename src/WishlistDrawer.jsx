@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './WishlistDrawer.css';
 
 const WishlistDrawer = ({
@@ -9,6 +10,7 @@ const WishlistDrawer = ({
   onClearWishlist,
   onAddToCart
 }) => {
+  const navigate = useNavigate();
   const [addedIds, setAddedIds] = useState({});
   const [toast, setToast] = useState(null);
 
@@ -151,7 +153,14 @@ const WishlistDrawer = ({
               <div className="empty-heart-icon">♡</div>
               <h3>Your Wishlist is Empty</h3>
               <p>Click the ❤️ heart on any product to save it here for easy checkout later!</p>
-              <button type="button" className="btn-browse-products" onClick={onClose}>
+              <button
+                type="button"
+                className="btn-browse-products"
+                onClick={() => {
+                  onClose();
+                  navigate('/products');
+                }}
+              >
                 Browse Products
               </button>
             </div>

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { useGlobalSettings } from './GlobalSettingsContext';
 import toast from 'react-hot-toast';
 import './InvoiceModal.css';
 
@@ -27,6 +28,7 @@ const InvoiceModal = ({ isOpen, onClose, order }) => {
   const invoiceRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { user } = useAuth();
+  const { settings } = useGlobalSettings();
 
   if (!isOpen || !order) return null;
 
@@ -77,8 +79,7 @@ const InvoiceModal = ({ isOpen, onClose, order }) => {
   const delivery = Number(order.pricing?.deliveryCharge || 0);
   const discount = Number(order.pricing?.discount || 0);
 
-  // Final Amount (Grand Total) ALWAYS includes: Subtotal + CGST (2.5%) + SGST (2.5%) + Delivery - Discount
-  const grandTotal = Number((subtotal + cgst + sgst + delivery - discount).toFixed(2));
+  const grandTotal = Number((subtotal + cgst + sgst + delivery).toFixed(2));
 
   // ── PDF Export Functionality ──
   const handleDownloadPDF = async () => {
@@ -209,28 +210,28 @@ const InvoiceModal = ({ isOpen, onClose, order }) => {
             <div className="inv-meta-split">
               {/* Left Column: Protinut Foods Details */}
               <div className="inv-company-details">
-                <h2 className="inv-company-name">PROTINUT FOODS</h2>
+                <h2 className="inv-company-name">{settings.companyName}</h2>
                 <div className="inv-company-info-row">
                   <span className="inv-icon">📍</span>
-                  <span>Laxmi Niwas, Vidya Nagar, Dharashiv (Gramin), Dharashiv Taluka, Dharashiv, Maharashtra - 413501</span>
+                  <span>{settings.companyAddress}</span>
                 </div>
                 <div className="inv-company-info-row">
                   <span className="inv-icon">✉️</span>
-                  <span>protinut.in@gmail.com</span>
+                  <span>{settings.supportEmail}</span>
                 </div>
                 <div className="inv-company-info-row">
                   <span className="inv-icon">📞</span>
-                  <span>+91 830 830 2301</span>
+                  <span>{settings.supportPhone}</span>
                 </div>
                 <div className="inv-company-info-row">
                   <span className="inv-icon">🌐</span>
-                  <span>www.protinut.in</span>
+                  <span>{settings.websiteUrl}</span>
                 </div>
                 <div className="inv-gstin-highlight">
-                  <strong>GSTIN : 27PRRPS9570L1Z6</strong>
+                  <strong>GSTIN : {settings.gstin}</strong>
                 </div>
                 <div className="inv-fssai-text">
-                  FSSAI No : <strong>21526050000128</strong>
+                  FSSAI No : <strong>{settings.fssai}</strong>
                 </div>
               </div>
 
@@ -447,8 +448,8 @@ const InvoiceModal = ({ isOpen, onClose, order }) => {
                     )}
                     {discount > 0 && (
                       <tr>
-                        <td className="calc-lbl text-green-700">Discount</td>
-                        <td className="calc-val text-green-700">− ₹{discount.toFixed(2)}</td>
+                        <td className="calc-lbl text-green-700">Savings (included above)</td>
+                        <td className="calc-val text-green-700">₹{discount.toFixed(2)}</td>
                       </tr>
                     )}
                     <tr className="grand-total-row">
@@ -469,15 +470,14 @@ const InvoiceModal = ({ isOpen, onClose, order }) => {
                 <h4 className="inv-terms-heading">Terms & Conditions:</h4>
                 <ul className="inv-terms-list">
                   <li>This is a computer generated invoice and does not require a physical signature.</li>
-                  <li>Goods once delivered cannot be returned except in case of damaged or wrong product.</li>
-                  <li>For return or refund, please visit www.protinut.in/returns within 7 days of delivery.</li>
-                  <li>For any support, contact us at protinut.in@gmail.com or +91 830 830 2301.</li>
+                  <li>{settings.returnPolicy}</li>
+                  <li>For any support, contact us at {settings.supportEmail} or {settings.supportPhone}.</li>
                 </ul>
               </div>
 
               {/* Signature Box */}
               <div className="inv-signature-col">
-                <span className="inv-sig-company">For PROTINUT Food's</span>
+                <span className="inv-sig-company">For {settings.companyName}</span>
                 <div className="inv-sig-stamp">
                   <div className="inv-sig-handwriting">
                     <span>PROTINUT</span>

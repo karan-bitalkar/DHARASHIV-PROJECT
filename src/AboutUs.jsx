@@ -95,7 +95,7 @@ const coreValues = [
   }
 ];
 
-const AboutUs = () => {
+const AboutUs = ({ settings }) => {
   const ref = useRef(null);
   const [show, setShow] = useState(false);
 
@@ -119,15 +119,8 @@ const AboutUs = () => {
           <span className="about-pill-badge">
             🌱 OUR STORY & HERITAGE
           </span>
-          <h1 className="about-hero-title">
-            Born from a <span className="highlight-orange">real need</span>.<br />
-            Built for <span className="highlight-orange">real people</span>.
-          </h1>
-          <p className="about-hero-subtitle">
-            In 2021, frustrated by chemical-laden, palm-oil-packed peanut butters flooding store shelves, 
-            we set out with a simple mission in Dharashiv, Maharashtra: 
-            <strong> deliver India’s purest, high-protein peanut butter, untouched by junk.</strong>
-          </p>
+          <h1 className="about-hero-title">{settings.aboutHeroHeading}</h1>
+          <p className="about-hero-subtitle">{settings.aboutHeroSubtitle}</p>
 
           {/* Key Brand Stats Strip */}
           <div className="about-stats-grid">
@@ -161,12 +154,8 @@ const AboutUs = () => {
             <span className="section-pill-badge">
               THE VISIONARY BEHIND PROTINUT™
             </span>
-            <h2 className="section-heading-title">
-              Meet The <span className="highlight-orange">Founder</span>
-            </h2>
-            <p className="section-heading-sub">
-              The personal journey that transformed a home kitchen in Dharashiv into India’s most honest peanut butter brand.
-            </p>
+            <h2 className="section-heading-title">{settings.aboutFounderHeading}</h2>
+            <p className="section-heading-sub">{settings.aboutFounderSubtitle}</p>
           </div>
 
           <div className="founder-card-box">
@@ -187,10 +176,10 @@ const AboutUs = () => {
                   </div>
 
                   <span className="founder-role-tag">
-                    FOUNDER & HEAD CHURNER
+                    FOUNDER & VISIONARY
                   </span>
                   <h3 className="founder-name-text">
-                    The Man Behind The Jars
+                    The Heart Behind the Jars
                   </h3>
                   <p className="founder-location-text">
                     Dharashiv, Maharashtra
@@ -227,20 +216,9 @@ const AboutUs = () => {
               </div>
 
               <div className="founder-bio-paragraphs">
-                <p>
-                  <strong>Meet the man behind the jars.</strong> Frustrated by chemical-laden peanut butters, 
-                  our founder started grinding hand-picked peanuts in his own kitchen in Dharashiv, Maharashtra. 
-                  Today, that same small-batch promise powers every jar of <strong>PROTINUT™</strong>.
-                </p>
-                <p>
-                  "As someone who worked out daily, I was appalled to discover that even the so-called 'healthy' brands 
-                  were mixing hydrogenated palm oil, emulsifiers, and cheap corn sugars into their peanut butter just to extend shelf life. 
-                  I refused to put that into my body, and I refused to let Indian families eat it either."
-                </p>
-                <p>
-                  "We set up our own stone grinding unit right here in Maharashtra. No shortcuts, no chemical stabilizers, 
-                  no corporate compromises. If it's not good enough for my family, it never leaves our doors."
-                </p>
+                {settings.founderStory.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
               </div>
 
               <div className="founder-tags-row">

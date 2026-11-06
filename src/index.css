@@ -9,6 +9,20 @@ body {
   background-color: #ffffff;
   color: #1e1e24;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+#root,
+main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 /* Global Floating Cart Toast */

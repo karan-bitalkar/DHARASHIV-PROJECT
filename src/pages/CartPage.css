@@ -759,3 +759,30 @@
     text-align: left;
   }
 }
+
+@media (max-width: 768px) {
+  .cart-mobile-checkout {
+    position: fixed;
+    z-index: 9980;
+    right: 0;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    padding: 10px 14px;
+    border-top: 1px solid #e8e4dc;
+    box-shadow: 0 -6px 20px rgba(43, 25, 17, 0.1);
+  }
+
+  .cart-mobile-checkout button {
+    width: 100%;
+  }
+
+  .cart-container {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .capacity-top-row {
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

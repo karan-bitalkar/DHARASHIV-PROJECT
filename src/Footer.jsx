@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
-import logoImg from './assets/protinut-logo.png'; // Make sure path is correct
+import logoImg from './assets/protinut-logo.png';
+import { useGlobalSettings } from './GlobalSettingsContext';
 
 const Footer = () => {
+  const { settings } = useGlobalSettings();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -17,7 +19,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="protinut-footer hidden md:block" id="contact-us">
+    <footer className="protinut-footer" id="contact-us">
       {/* Top Newsletter Strip */}
       <div className="footer-newsletter-wrap">
         <div className="footer-newsletter-container">
@@ -55,7 +57,7 @@ const Footer = () => {
           {/* Brand Col */}
           <div className="footer-col brand-col">
             <Link to="/">
-              <img src={logoImg} alt="PROTINUT™" className="footer-logo" />
+              <img src={logoImg} alt={`${settings.companyName} logo`} className="footer-logo" />
             </Link>
             <p className="footer-tagline">
               Crafting India's purest, 100% slow-roasted peanut butters for fitness enthusiasts, athletes, and conscious families.
@@ -96,12 +98,12 @@ const Footer = () => {
           {/* Contact & Hours */}
           <div className="footer-col contact-col">
             <h4 className="font-bold text-lg mb-2">Customer Support</h4>
-            <p className="text-sm text-gray-600">📍 PROTINUT FOODS<br />Laxmi Niwas, Vidya Nagar, Dharashiv (Gramin), Dharashiv Taluka, Dharashiv, Maharashtra - 413501</p>
-            <p className="text-sm text-gray-600">📧 <a href="mailto:protinut.in@gmail.com" className="underline hover:text-primary">protinut.in@gmail.com</a></p>
-            <p className="text-sm text-gray-600">📞 <a href="tel:+918308302301" className="underline hover:text-primary">+91 830 830 2301</a></p>
-            <p className="text-sm font-bold text-gray-800 mt-1">GSTIN: 27PRRPS9570L1Z6</p>
+            <p className="text-sm text-gray-600">📍 {settings.companyName}<br />{settings.companyAddress}</p>
+            <p className="text-sm text-gray-600">📧 <a href={`mailto:${settings.supportEmail}`} className="underline hover:text-primary">{settings.supportEmail}</a></p>
+            <p className="text-sm text-gray-600">📞 <a href={`tel:${settings.supportPhone.replace(/[^\d+]/g, '')}`} className="underline hover:text-primary">{settings.supportPhone}</a></p>
+            <p className="text-sm font-bold text-gray-800 mt-1">GSTIN: {settings.gstin}</p>
             <div className="fssai-stamp">
-              <span>FSSAI No: 21526050000128</span>
+              <span>FSSAI No: {settings.fssai}</span>
             </div>
           </div>
 

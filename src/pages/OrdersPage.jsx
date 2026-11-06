@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useOrders } from '../OrderContext';
 import { useAuth } from '../AuthContext';
@@ -13,14 +13,25 @@ const OrdersPage = () => {
 
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+  const customerOrders = useMemo(() => {
+    const email = String(user?.email || user?.identifier || '').trim().toLowerCase();
+    return email
+      ? orders.filter((order) => String(order.userEmail || '').trim().toLowerCase() === email)
+      : orders;
+  }, [orders, user?.email, user?.identifier]);
+  const completedOrders = customerOrders.filter((order) => order.status === 'Delivered').length;
+  const cancelledOrders = customerOrders.filter((order) => order.status === 'Cancelled').length;
+  const pendingOrders = customerOrders.filter((order) => (
+    ['Order Placed', 'Pending', 'Processing', 'Shipped', 'Out for Delivery'].includes(order.status)
+  )).length;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
     const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get('invoice') === 'latest' && orders.length > 0) {
-      setSelectedInvoiceOrder(orders[0]);
+    if (searchParams.get('invoice') === 'latest' && customerOrders.length > 0) {
+      setSelectedInvoiceOrder(customerOrders[0]);
     }
-  }, [location.search, orders]);
+  }, [location.search, customerOrders]);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -59,10 +70,10 @@ const OrdersPage = () => {
             </p>
           </div>
           <div className="flex items-center gap-2.5">
-            {orders.length > 0 && (
+            {customerOrders.length > 0 && (
               <button
                 type="button"
-                onClick={() => setSelectedInvoiceOrder(orders[0])}
+                onClick={() => setSelectedInvoiceOrder(customerOrders[0])}
                 className="inline-flex items-center gap-1.5 bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-300 text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm transition"
               >
                 <span>🧾 Tax Invoice</span>
@@ -78,7 +89,22 @@ const OrdersPage = () => {
           </div>
         </div>
 
-        {orders.length === 0 ? (
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" aria-label="Your order analytics">
+          {[
+            ['Total Orders', customerOrders.length, '📦'],
+            ['Delivered', completedOrders, '✓'],
+            ['Pending / In Transit', pendingOrders, '🚚'],
+            ['Cancelled', cancelledOrders, '×']
+          ].map(([label, count, icon]) => (
+            <article key={label} className="rounded-xl border border-orange-100 bg-white p-4 shadow-sm">
+              <span className="text-xl" aria-hidden="true">{icon}</span>
+              <p className="mt-2 text-xs font-bold uppercase tracking-wide text-gray-500">{label}</p>
+              <strong className="text-2xl font-black text-gray-900">{count}</strong>
+            </article>
+          ))}
+        </section>
+
+        {customerOrders.length === 0 ? (
           /* Empty Orders State */
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 py-16 px-6 text-center max-w-lg mx-auto my-8">
             <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner">
@@ -97,7 +123,7 @@ const OrdersPage = () => {
           </div>
         ) : (
           <div className="space-y-5">
-            {orders.map((order) => {
+            {customerOrders.map((order) => {
               const firstItem = order.items[0];
               const remainingCount = order.items.length - 1;
               const isCancelled = order.status === 'Cancelled';
@@ -108,8 +134,8 @@ const OrdersPage = () => {
                   className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                 >
                   {/* Top Order Meta Bar (Flipkart Style) */}
-                  <div className="bg-gray-50 px-5 py-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-3">
+                  <div className="bg-gray-50 px-5 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 text-xs">
+                    <div className="flex flex-wrap items-center gap-3">
                       <div>
                         <span className="text-gray-400 font-bold uppercase">ORDER PLACED</span>
                         <div className="text-gray-800 font-semibold">{order.date}</div>
@@ -128,13 +154,18 @@ const OrdersPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-gray-600 font-bold">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="font-mono text-gray-600 font-bold break-all">
                         #{order.id}
                       </span>
                       <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(order.status)}`}>
                         ● {order.status}
                       </span>
+                      {order.trackingId && (
+                        <span className="font-mono text-gray-500">
+                          Tracking: <strong className="text-gray-700">{order.trackingId}</strong>
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -142,7 +173,7 @@ const OrdersPage = () => {
                   <div className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     
                     {/* Items Preview */}
-                    <div className="flex items-center gap-4 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1 min-w-0">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-50 rounded-xl p-2 flex items-center justify-center border border-amber-100 flex-shrink-0">
                         <img
                           src={firstItem?.image || '/products/classy-crunch.png'}
@@ -204,7 +235,7 @@ const OrdersPage = () => {
 
                       {/* Track Order Live Button */}
                       <Link
-                        to={`/orders/${order.id}`}
+                        to={`/track-order/${order.id}`}
                         className="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary-hover rounded-lg shadow-sm transition flex items-center gap-1.5"
                       >
                         <span>Track Order Live</span>

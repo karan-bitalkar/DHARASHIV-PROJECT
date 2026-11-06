@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useAdminStore } from './AdminStoreContext';
+import { getProductPricing } from './productPricing';
+import { isProductPurchasable } from './productAvailability';
 
 const CartContext = createContext(null);
 
 const MAX_CART_LIMIT = 5;
 
 export const CartProvider = ({ children }) => {
+  const { products } = useAdminStore();
   // Initial state is strictly empty [] - no hardcoded dummy items!
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -24,6 +28,22 @@ export const CartProvider = ({ children }) => {
       console.error('Error saving cart to localStorage', e);
     }
   }, [cartItems]);
+
+  useEffect(() => {
+    setCartItems((currentItems) => {
+      let changed = false;
+      const updatedItems = currentItems.map((item) => {
+        const product = products.find((currentProduct) => currentProduct.id === item.id);
+        if (!product) return item;
+
+        const pricing = getProductPricing(product, item.selectedWeight);
+        if (item.finalPrice === pricing.finalPrice && item.originalPrice === pricing.mrp) return item;
+        changed = true;
+        return { ...item, finalPrice: pricing.finalPrice, originalPrice: pricing.mrp };
+      });
+      return changed ? updatedItems : currentItems;
+    });
+  }, [products]);
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -49,8 +69,14 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, quantity = 1, selectedWeight = null) => {
     const weight = selectedWeight || product.selectedWeight || '550gm';
-    const price = product.finalPrice || (weight === '1kg' ? (product.price1kg || 480) : (product.price550 || product.price || 250));
-    const original = product.originalPrice || Math.round(price * 1.35);
+    const managedProduct = products.find((currentProduct) => currentProduct.id === product.id) || product;
+    if (!isProductPurchasable(managedProduct)) {
+      toast.error(`${managedProduct.name} is currently unavailable.`);
+      return false;
+    }
+    const pricing = getProductPricing(managedProduct, weight);
+    const price = pricing.finalPrice ?? product.finalPrice ?? 0;
+    const original = pricing.mrp ?? product.originalPrice ?? price;
 
     const currentTotal = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     if (currentTotal + quantity > MAX_CART_LIMIT) {
@@ -83,12 +109,12 @@ export const CartProvider = ({ children }) => {
         ...prev,
         {
           id: product.id,
-          name: product.name,
+          name: managedProduct.name,
           selectedWeight: weight,
           originalPrice: original,
           finalPrice: price,
           quantity,
-          image: product.image || '/products/classy-crunch.png',
+          image: managedProduct.image || '/products/classy-crunch.png',
         }
       ];
     });

@@ -29,7 +29,25 @@ export const OrderProvider = ({ children }) => {
     }
   }, [orders]);
 
-  const placeOrder = ({ items, address, paymentMethod, subtotal, discount, cgst, sgst, totalGst, deliveryCharge, grandTotal, userEmail }) => {
+  useEffect(() => {
+    const syncOrders = (event) => {
+      if (event.key !== 'protinut_orders' || !event.newValue) return;
+      try {
+        const nextOrders = JSON.parse(event.newValue);
+        if (Array.isArray(nextOrders)) {
+          setOrders((currentOrders) => (
+            JSON.stringify(currentOrders) === event.newValue ? currentOrders : nextOrders
+          ));
+        }
+      } catch (error) {
+        console.error('Unable to sync orders from another browser tab', error);
+      }
+    };
+    window.addEventListener('storage', syncOrders);
+    return () => window.removeEventListener('storage', syncOrders);
+  }, []);
+
+  const placeOrder = ({ items, address, paymentMethod, subtotal, discount, deliveryCharge, userEmail }) => {
     const uniqueDigits = Math.floor(100000 + Math.random() * 900000);
     const orderId = `ORD-${Date.now().toString().slice(-4)}${uniqueDigits}`;
     const now = new Date();
@@ -38,15 +56,19 @@ export const OrderProvider = ({ children }) => {
       month: 'short',
       year: 'numeric'
     });
+    const subtotalAmount = Number(subtotal) || 0;
+    const cgstAmount = Number(((subtotalAmount * 2.5) / 100).toFixed(2));
+    const sgstAmount = Number(((subtotalAmount * 2.5) / 100).toFixed(2));
+    const deliveryAmount = Number(deliveryCharge) || 0;
 
     const newOrder = {
       id: orderId,
       invoiceNo: `INV-${uniqueDigits}`,
       date: formattedDate,
       invoiceDate: formattedDate,
-      status: 'Delivered',
-      statusIndex: 4,
-      canCancel: false,
+      status: 'Order Placed',
+      statusIndex: 0,
+      canCancel: true,
       // Map strictly to the exact items the user bought:
       items: items.map(i => ({
         id: i.id,
@@ -68,20 +90,20 @@ export const OrderProvider = ({ children }) => {
       userEmail: userEmail || address?.email || '',
       paymentMethod,
       pricing: {
-        subtotal: Number(subtotal),
+        subtotal: subtotalAmount,
         discount: Number(discount || 0),
-        cgst: Number(((Number(subtotal) * 2.5) / 100).toFixed(2)),
-        sgst: Number(((Number(subtotal) * 2.5) / 100).toFixed(2)),
-        totalGst: Number(((Number(subtotal) * 5) / 100).toFixed(2)),
-        deliveryCharge: Number(deliveryCharge || 0),
-        grandTotal: Number((Number(subtotal) + ((Number(subtotal) * 5) / 100) + Number(deliveryCharge || 0) - Number(discount || 0)).toFixed(2))
+        cgst: cgstAmount,
+        sgst: sgstAmount,
+        totalGst: Number((cgstAmount + sgstAmount).toFixed(2)),
+        deliveryCharge: deliveryAmount,
+        grandTotal: Number((subtotalAmount + cgstAmount + sgstAmount + deliveryAmount).toFixed(2))
       },
       timeline: [
         { step: 'Order Placed', date: formattedDate, desc: 'Your order has been received and confirmed.', completed: true },
-        { step: 'Processing', date: formattedDate, desc: 'Item packed at Dharashiv warehouse.', completed: true },
-        { step: 'Shipped', date: formattedDate, desc: 'Handed over to Express Courier partner.', completed: true },
-        { step: 'Out for Delivery', date: formattedDate, desc: 'Courier agent out for delivery.', completed: true },
-        { step: 'Delivered', date: formattedDate, desc: 'Package delivered to recipient.', completed: true }
+        { step: 'Processing', date: '', desc: '', completed: false },
+        { step: 'Shipped', date: '', desc: '', completed: false },
+        { step: 'Out for Delivery', date: '', desc: '', completed: false },
+        { step: 'Delivered', date: '', desc: '', completed: false }
       ]
     };
 
@@ -116,6 +138,34 @@ export const OrderProvider = ({ children }) => {
     );
   };
 
+  const updateOrderStatus = (orderId, status, trackingId = '') => {
+    const trackingSteps = ['Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
+    const statusIndexes = { 'Order Placed': 0, Pending: 0, Processing: 1, Shipped: 2, 'Out for Delivery': 3, Delivered: 4, Cancelled: -1 };
+    const updatedAt = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    setOrders((prev) => prev.map((order) => {
+      if (order.id !== orderId) return order;
+      const statusIndex = statusIndexes[status] ?? order.statusIndex ?? 0;
+      return {
+        ...order,
+        status,
+        trackingId: trackingId.trim() || order.trackingId || '',
+        statusUpdatedAt: updatedAt,
+        canCancel: status === 'Order Placed' || status === 'Pending',
+        statusIndex,
+        timeline: trackingSteps.map((step, index) => {
+          const wasCompleted = order.timeline?.find((entry) => entry.step === step)?.completed;
+          const completed = statusIndex >= index || (status === 'Cancelled' && wasCompleted);
+          return {
+            step,
+            date: completed ? (step === status ? updatedAt : order.timeline?.find((entry) => entry.step === step)?.date || order.date) : '',
+            desc: step === status ? `Order status updated to ${status}.` : order.timeline?.find((entry) => entry.step === step)?.desc || '',
+            completed
+          };
+        })
+      };
+    }));
+  };
+
   const resetOrders = () => {
     setOrders([]);
     try {
@@ -131,6 +181,7 @@ export const OrderProvider = ({ children }) => {
         orders,
         placeOrder,
         cancelOrder,
+        updateOrderStatus,
         resetOrders
       }}
     >

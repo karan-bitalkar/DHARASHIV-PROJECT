@@ -190,7 +190,28 @@
 
 @media (max-width: 960px) {
   .reviews-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 18px;
+  }
+
+  .review-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonials-section {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .review-card-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .reviewed-product-tag {
+    white-space: normal;
+    text-align: right;
   }
 }
