@@ -30,7 +30,10 @@ const CartPage = () => {
   }, []);
 
   const freeDeliveryThreshold = 499;
-  const amountNeededForFreeDelivery = Math.max(0, freeDeliveryThreshold - subtotal);
+  const amountNeededForFreeDelivery = Math.max(
+    0,
+    Number((freeDeliveryThreshold + 0.01 - subtotal).toFixed(2))
+  );
 
   return (
     <div className="min-h-screen bg-[#f1f3f6] py-6 px-3 sm:px-6 lg:px-8 pb-40 md:pb-8 font-sans">
@@ -93,7 +96,7 @@ const CartPage = () => {
                   <div>
                     <div className="text-xs text-gray-500 font-semibold uppercase">Deliver to:</div>
                     <div className="text-sm font-bold text-gray-900">
-                      {user?.name || 'Customer'} — <span className="text-gray-600 font-normal">Pune 411035</span>
+                      {user?.name || 'Customer'} — <span className="text-gray-600 font-normal">Confirm your delivery address at checkout</span>
                     </div>
                   </div>
                 </div>
@@ -103,7 +106,7 @@ const CartPage = () => {
               </div>
 
               {/* Delivery Progress Banner */}
-              {subtotal < freeDeliveryThreshold ? (
+              {subtotal <= freeDeliveryThreshold ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3.5 flex items-center justify-between text-xs text-amber-900 font-medium">
                   <div className="flex items-center gap-2">
                     <span className="text-base">🚚</span>

@@ -10,7 +10,6 @@ import { getProductStockStatus, isProductPurchasable } from './productAvailabili
 import ProtectedRoute from './ProtectedRoute';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import ProductModal from './ProductModal';
 import SideCartDrawer from './SideCartDrawer';
 import WishlistDrawer from './WishlistDrawer';
 import AuthModal from './AuthModal';
@@ -18,6 +17,7 @@ import InvoiceModal from './InvoiceModal';
 import BottomNav from './BottomNav';
 import { initialWishlistProducts } from './wishlistData';
 import { allProductsData } from './OurRange';
+import { getCustomerIdentity, getCustomerOrders } from './orderOwnership';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -49,9 +49,11 @@ function AppContent() {
     totalCartCount,
     addToCart: contextAddToCart,
     updateQuantity,
-    removeItem
+    removeItem,
+    resetCart
   } = useCart();
   const { orders } = useOrders();
+  const customerOrders = getCustomerOrders(orders, user);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,7 +61,6 @@ function AppContent() {
   const isTrackingRoute = location.pathname.startsWith('/track-order/');
   const hideHeaderFooter = isAdminRoute || isTrackingRoute;
 
-  const [activeModalProduct, setActiveModalProduct] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -106,6 +107,8 @@ function AppContent() {
 
   // Central Logout Handler: Clears session, stays on / redirects to '/', opens Login modal immediately
   const handleLogout = () => {
+      resetCart();
+      setWishlistItems([]);
     logout();
     navigate('/', { replace: true });
     setAuthModalMode('login');
@@ -221,7 +224,6 @@ function AppContent() {
   // ── Wishlist Handlers (Add / Remove toggle with Auth Check) ──
   const handleToggleWishlist = (product) => {
     if (!isAuthenticated) {
-      setActiveModalProduct(null);
       toast.error('Please login or register to use your wishlist', {
         id: 'auth-wishlist-action-toast',
         duration: 3500,
@@ -254,6 +256,13 @@ function AppContent() {
 
   // ── Centralized Login Success Handler (Fulfills the action that required sign-in) ──
   const handleLoginSuccess = (loggedInUser) => {
+    const currentIdentity = getCustomerIdentity(user);
+    const nextIdentity = getCustomerIdentity(loggedInUser);
+    if (currentIdentity && nextIdentity && currentIdentity !== nextIdentity) {
+      resetCart();
+      setWishlistItems([]);
+    }
+
     setIsAuthOpen(false);
     const displayName = loggedInUser?.name || 'Customer';
     toast.success(`Welcome, ${displayName}!`, {
@@ -306,7 +315,6 @@ function AppContent() {
   // ── 1. Add to Cart (Sign-in required) ──
   const handleAddToCart = (product) => {
     if (!isAuthenticated) {
-      setActiveModalProduct(null);
       queuePendingAction({ type: 'ADD_TO_CART', product });
       toast('Please login or register to add items to your cart.', { icon: '🔒' });
       navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
@@ -337,7 +345,6 @@ function AppContent() {
     };
 
     if (!isAuthenticated) {
-      setActiveModalProduct(null);
       queuePendingAction({ type: 'BUY_NOW', product: buyNowData });
       toast('Please login or register before checkout.', { icon: '🔒' });
       navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
@@ -356,11 +363,8 @@ function AppContent() {
   };
 
   const handleOpenQuickView = (product) => {
-    setActiveModalProduct(product);
-  };
-
-  const handleCloseQuickView = () => {
-    setActiveModalProduct(null);
+    if (product?.id == null) return;
+    navigate(`/product/${encodeURIComponent(product.id)}`);
   };
 
   return (
@@ -572,8 +576,27 @@ function AppContent() {
           <Route
             path="/track-order/:orderId"
             element={
-              <React.Suspense fallback={<div className="min-h-screen bg-[#F8F3E8]" />}>
-                <TrackingPage />
+              <React.Suspense
+                fallback={(
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    style={{
+                      minHeight: '100dvh',
+                      display: 'grid',
+                      placeItems: 'center',
+                      background: '#F8F3E8',
+                      color: '#3E2723',
+                      fontWeight: 700
+                    }}
+                  >
+                    Loading order tracking...
+                  </div>
+                )}
+              >
+                <ProtectedRoute>
+                  <TrackingPage />
+                </ProtectedRoute>
               </React.Suspense>
             }
           />
@@ -596,30 +619,32 @@ function AppContent() {
           <Route
             path="/invoice"
             element={
-              <div className="min-h-screen bg-[#faf5ee]">
-                {orders.length > 0 ? (
-                  <InvoiceModal
-                    isOpen={true}
-                    onClose={() => navigate(-1 || '/orders')}
-                    order={orders[0]}
-                  />
-                ) : (
-                  <div className="max-w-md mx-auto pt-24 text-center p-6">
-                    <span className="text-4xl block mb-3">🧾</span>
-                    <h3 className="font-bold text-gray-900 text-lg mb-2">No Active Order Found</h3>
-                    <p className="text-gray-500 text-sm mb-5">
-                      Invoices are dynamically generated when you place an order. Please place an order first!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => navigate('/products')}
-                      className="bg-[#F58220] hover:bg-[#e06d0e] text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow transition"
-                    >
-                      Browse Products
-                    </button>
-                  </div>
-                )}
-              </div>
+              <ProtectedRoute>
+                <div className="min-h-screen bg-[#faf5ee]">
+                  {customerOrders.length > 0 ? (
+                    <InvoiceModal
+                      isOpen={true}
+                      onClose={() => navigate('/orders')}
+                      order={customerOrders[0]}
+                    />
+                  ) : (
+                    <div className="max-w-md mx-auto pt-24 text-center p-6">
+                      <span className="text-4xl block mb-3">🧾</span>
+                      <h3 className="font-bold text-gray-900 text-lg mb-2">No Active Order Found</h3>
+                      <p className="text-gray-500 text-sm mb-5">
+                        Invoices are dynamically generated when you place an order. Please place an order first!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/products')}
+                        className="bg-[#F58220] hover:bg-[#e06d0e] text-white font-bold text-sm px-6 py-2.5 rounded-lg shadow transition"
+                      >
+                        Browse Products
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </ProtectedRoute>
             }
           />
 
@@ -656,6 +681,7 @@ function AppContent() {
             element={
               <HomePage
                 onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
                 onQuickView={handleOpenQuickView}
                 wishlistItems={wishlistItems}
                 onToggleWishlist={handleToggleWishlist}
@@ -688,18 +714,6 @@ function AppContent() {
           onRemoveFromWishlist={handleRemoveFromWishlist}
           onClearWishlist={handleClearWishlist}
           onAddToCart={handleAddToCart}
-        />
-      )}
-
-      {/* Quick View Modal */}
-      {activeModalProduct && (
-        <ProductModal
-          product={activeModalProduct}
-          onClose={handleCloseQuickView}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-          wishlistItems={wishlistItems}
-          onToggleWishlist={handleToggleWishlist}
         />
       )}
 

@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem('protinut_user');
+      const savedUser = localStorage.getItem('protinut_user') || sessionStorage.getItem('protinut_user');
       const saved = savedUser ? JSON.parse(savedUser) : null;
       return saved?.role === 'ROLE_ADMIN' ? null : saved;
     } catch {
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = Boolean(adminToken && adminUser?.role === 'ROLE_ADMIN');
 
   // Normal Customer Login
-  const login = (userData) => {
+  const login = (userData, rememberMe = true) => {
     const formattedUser = {
       name: userData.name || 'Protinut Member',
       email: userData.email || userData.identifier || 'member@protinut.in',
@@ -45,13 +45,26 @@ export const AuthProvider = ({ children }) => {
       avatar: userData.avatar || (userData.name ? userData.name.charAt(0).toUpperCase() : 'P'),
       joinedAt: userData.joinedAt || 'Oct 2026'
     };
+    const previousIdentity = String(user?.email || user?.identifier || '').trim().toLowerCase();
+    const nextIdentity = String(formattedUser.email || formattedUser.identifier || '').trim().toLowerCase();
+    try {
+      if (previousIdentity && nextIdentity && previousIdentity !== nextIdentity) {
+        localStorage.removeItem('protinut_delivery_address');
+      }
+      const userStorage = rememberMe ? localStorage : sessionStorage;
+      userStorage.setItem('protinut_user', JSON.stringify(formattedUser));
+      (rememberMe ? sessionStorage : localStorage).removeItem('protinut_user');
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('protinut_admin_user');
+    } catch (e) {
+      console.error('Error saving user to browser storage', e);
+      return null;
+    }
+
     setUser(formattedUser);
     setAdminToken(null);
     setAdminUser(null);
     try {
-      localStorage.setItem('protinut_user', JSON.stringify(formattedUser));
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('protinut_admin_user');
       const savedCustomers = JSON.parse(localStorage.getItem('protinut_customers') || '[]');
       const customer = {
         name: formattedUser.name,
@@ -65,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         customer
       ]));
     } catch (e) {
-      console.error('Error saving user to localStorage', e);
+      console.error('Error saving customer details to localStorage', e);
     }
     return formattedUser;
   };
@@ -111,11 +124,12 @@ export const AuthProvider = ({ children }) => {
     setAdminUser(null);
     try {
       localStorage.removeItem('protinut_user');
+      sessionStorage.removeItem('protinut_user');
       localStorage.removeItem('adminToken');
       localStorage.removeItem('protinut_admin_user');
       localStorage.removeItem('protinut_cart');
       localStorage.removeItem('protinut_wishlist');
-      localStorage.removeItem('protinut_orders');
+      localStorage.removeItem('protinut_delivery_address');
     } catch (e) {
       console.error('Error clearing user from localStorage', e);
     }

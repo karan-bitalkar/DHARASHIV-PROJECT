@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getCancellationPaymentInfo } from './orderCancellation';
 
 const CANCELLATION_REASONS = [
   'Ordered by mistake',
@@ -29,6 +30,7 @@ const CancelOrderModal = ({ isOpen, onClose, onConfirmCancel, order }) => {
     : selectedReason;
 
   const isContinueDisabled = !selectedReason || (selectedReason === 'Other (Please specify)' && !otherReasonText.trim());
+  const paymentInfo = getCancellationPaymentInfo(order);
 
   const handleProceedToConfirm = (e) => {
     e.preventDefault();
@@ -38,9 +40,12 @@ const CancelOrderModal = ({ isOpen, onClose, onConfirmCancel, order }) => {
 
   const handleFinalCancel = async () => {
     setIsSubmitting(true);
-    await onConfirmCancel(order.id, finalReason);
-    setIsSubmitting(false);
-    handleClose();
+    try {
+      const cancelled = await onConfirmCancel(order.id, finalReason);
+      if (cancelled) handleClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -168,13 +173,35 @@ const CancelOrderModal = ({ isOpen, onClose, onConfirmCancel, order }) => {
                 <span className="text-gray-500">Cancellation Reason:</span>
                 <strong className="text-gray-900 max-w-[200px] truncate text-right">{finalReason}</strong>
               </div>
-              <div className="flex justify-between items-center text-gray-700">
-                <span className="text-gray-500">Refund Amount:</span>
-                <strong className="text-primary text-sm font-black">₹{order.pricing?.grandTotal}</strong>
-              </div>
-              <div className="text-[11px] text-emerald-700 bg-emerald-50 p-2 rounded border border-emerald-200 font-medium leading-relaxed">
-                ✓ Full refund will be automatically returned to your original payment method ({order.paymentMethod}) within 2-4 business days.
-              </div>
+              {paymentInfo.type === 'cod' && (
+                <p className="text-[11px] text-gray-700 bg-gray-100 p-2 rounded border border-gray-200 font-medium leading-relaxed">
+                  No refund is applicable because payment has not been collected.
+                </p>
+              )}
+              {paymentInfo.type === 'prepaid-success' && (
+                <>
+                  <div className="flex justify-between items-center text-gray-700">
+                    <span className="text-gray-500">Eligible refund amount:</span>
+                    <strong className="text-primary text-sm font-black">
+                      ₹{paymentInfo.eligibleRefundAmount.toFixed(2)}
+                    </strong>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200 font-medium leading-relaxed">
+                    Payment was successful. Eligible refund to the original payment method ({paymentInfo.paymentMethod || 'Not recorded'}); processing must be confirmed separately.
+                  </p>
+                </>
+              )}
+              {paymentInfo.type === 'amount-unavailable' && (
+                <p className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 font-medium leading-relaxed">
+                  Payment was successful, but an eligible refund amount cannot be calculated from this order. Payment method: {paymentInfo.paymentMethod || 'Not recorded'}.
+                </p>
+              )}
+              {paymentInfo.type === 'not-successful' && (
+                <p className="text-[11px] text-gray-700 bg-gray-100 p-2 rounded border border-gray-200 font-medium leading-relaxed">
+                  No refund is shown because payment is not recorded as successful (status: {paymentInfo.paymentStatus}).
+                  {paymentInfo.paymentMethod ? ` Payment method: ${paymentInfo.paymentMethod}.` : ''}
+                </p>
+              )}
             </div>
 
             {/* Step 2 Actions */}

@@ -141,8 +141,12 @@ const AuthModal = ({
           email: raw.includes('@') ? raw : `${raw}@protinut.in`,
           phone: !raw.includes('@') ? raw : '+91 98765 43210'
         };
-        login(loggedUser);
-        if (onLoginSuccess) onLoginSuccess(loggedUser);
+        const authenticatedUser = login(loggedUser, rememberMe);
+        if (!authenticatedUser) {
+          toast.error('Unable to save your login in this browser. Please check browser storage and try again.');
+          return;
+        }
+        if (onLoginSuccess) onLoginSuccess(authenticatedUser);
         onClose();
         toast.success(`Welcome back, ${displayName}!`, {
           style: {
@@ -380,7 +384,6 @@ const AuthModal = ({
                         className="auth-eye-btn"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        tabIndex="-1"
                       >
                         {showPassword ? (
                           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -585,7 +588,6 @@ const AuthModal = ({
                         className="auth-eye-btn"
                         onClick={() => setShowPassword(!showPassword)}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        tabIndex="-1"
                       >
                         {showPassword ? (
                           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

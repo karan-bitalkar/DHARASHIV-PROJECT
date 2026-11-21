@@ -176,7 +176,7 @@ const AboutUs = ({ settings }) => {
                   </div>
 
                   <span className="founder-role-tag">
-                    FOUNDER & VISIONARY
+                    FOUNDER & CEO
                   </span>
                   <h3 className="founder-name-text">
                     The Heart Behind the Jars

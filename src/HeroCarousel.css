@@ -88,37 +88,6 @@
   filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.35));
 }
 
-.hero-cms-copy {
-  position: absolute;
-  z-index: 4;
-  bottom: 52px;
-  left: clamp(18px, 6vw, 88px);
-  width: min(440px, calc(100% - 36px));
-  padding: clamp(15px, 2.4vw, 24px);
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  border-radius: 14px;
-  background: rgba(31, 24, 18, 0.78);
-  color: #fff;
-  pointer-events: none;
-  backdrop-filter: blur(7px);
-}
-
-.hero-cms-copy h1 {
-  margin: 0;
-  color: #fff;
-  font-family: 'Montserrat', sans-serif;
-  font-size: clamp(30px, 4.2vw, 60px);
-  font-weight: 900;
-  line-height: 1.15;
-}
-
-.hero-cms-copy p {
-  margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: clamp(11px, 1.3vw, 14px);
-  line-height: 1.5;
-}
-
 /* ── Slide Counter Badge (Flipkart/Myntra style) ── */
 .carousel-counter {
   position: absolute;
@@ -285,20 +254,5 @@
 @media (max-width: 480px) {
   .hero-carousel {
     height: clamp(210px, 70vw, 280px);
-  }
-
-  .hero-cms-copy {
-    bottom: 34px;
-    left: 12px;
-    width: min(390px, calc(100% - 24px));
-    padding: 12px;
-  }
-
-  .hero-cms-copy h1 {
-    font-size: 30px;
-  }
-
-  .hero-cms-copy p {
-    font-size: 12px;
   }
 }

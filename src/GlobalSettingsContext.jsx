@@ -18,7 +18,7 @@ export const defaultGlobalSettings = {
     { id: 'hero-slide-28', src: '/hero-slides/slide-28.png', alt: 'Fuel Your Day, Power Your Way - Shop Now Both Jars', active: true },
     { id: 'hero-slide-30', src: '/hero-slides/slide-30.png', alt: 'Real Peanuts. Real Nutrition. - Explore Products', active: true }
   ],
-  offerBannerText: 'Free pan-India delivery on every order',
+  // offerBannerText: 'Free pan-India delivery on every order',
   showOfferBanner: true,
   aboutHeroHeading: 'Born from a real need. Built for real people.',
   aboutHeroSubtitle: 'In 2021, frustrated by chemical-laden, palm-oil-packed peanut butters flooding store shelves, we set out with a simple mission in Dharashiv, Maharashtra: deliver India’s purest, high-protein peanut butter, untouched by junk.',

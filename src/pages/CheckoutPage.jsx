@@ -11,10 +11,45 @@ import InvoiceModal from '../InvoiceModal';
 import PaymentGatewayModal from '../PaymentGatewayModal';
 
 const INDIAN_STATES = [
-  'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Gujarat', 
-  'Uttar Pradesh', 'Rajasthan', 'Telangana', 'West Bengal', 'Kerala',
-  'Madhya Pradesh', 'Punjab', 'Haryana', 'Bihar', 'Andhra Pradesh'
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa',
+  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala',
+  'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland',
+  'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands',
+  'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi',
+  'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
 ];
+
+const isCompleteAddress = (address) => Boolean(
+  address.name?.trim()
+  && address.mobile?.replace(/\D/g, '').length === 10
+  && address.pincode?.trim().length === 6
+  && address.city?.trim()
+  && address.state?.trim()
+  && address.addressLine?.trim()
+);
+
+const readSavedAddress = (user) => {
+  try {
+    const saved = localStorage.getItem('protinut_delivery_address');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.name && parsed.mobile && parsed.pincode && parsed.city && parsed.addressLine) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error('Unable to read the saved delivery address', error);
+  }
+  return {
+    name: user?.name || '',
+    mobile: (user?.phone || '').replace(/\D/g, ''),
+    pincode: '',
+    city: '',
+    state: 'Maharashtra',
+    addressLine: ''
+  };
+};
 
 const CheckoutPage = () => {
   const {
@@ -27,7 +62,8 @@ const CheckoutPage = () => {
     sgst,
     totalGst,
     deliveryCharge,
-    grandTotal
+    grandTotal,
+    clearCart
   } = useCart();
 
   const { placeOrder } = useOrders();
@@ -84,37 +120,18 @@ const CheckoutPage = () => {
   }, []);
 
   // ── Address State ──
-  const [address, setAddress] = useState(() => {
-    try {
-      const saved = localStorage.getItem('protinut_delivery_address');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.name && parsed.mobile && parsed.pincode && parsed.city && parsed.addressLine) {
-          return parsed;
-        }
-      }
-    } catch {}
-    return {
-      name: user?.name || '',
-      mobile: (user?.phone || '').replace(/\D/g, ''),
-      pincode: '',
-      city: '',
-      state: 'Maharashtra',
-      addressLine: ''
-    };
-  });
-
-  const isInitialAddressComplete = Boolean(
-    address.name?.trim() &&
-    address.mobile?.replace(/\D/g, '').length === 10 &&
-    address.pincode?.trim().length === 6 &&
-    address.city?.trim() &&
-    address.state?.trim() &&
-    address.addressLine?.trim()
-  );
+  const [address, setAddress] = useState(() => readSavedAddress(user));
+  const isInitialAddressComplete = isCompleteAddress(address);
 
   const [isEditingAddress, setIsEditingAddress] = useState(!isInitialAddressComplete);
   const [addressErrors, setAddressErrors] = useState({});
+
+  useEffect(() => {
+    const nextAddress = readSavedAddress(user);
+    setAddress(nextAddress);
+    setIsEditingAddress(!isCompleteAddress(nextAddress));
+    setAddressErrors({});
+  }, [user?.email, user?.identifier]);
 
   // ── Payment State (unselected by default for strict validation) ──
   // Options: 'upi', 'card', 'netbanking', 'cod' or ''
@@ -193,10 +210,14 @@ const CheckoutPage = () => {
   const handleSaveAddress = (e) => {
     if (e) e.preventDefault();
     if (validateAddress()) {
-      setIsEditingAddress(false);
       try {
         localStorage.setItem('protinut_delivery_address', JSON.stringify(address));
-      } catch {}
+      } catch (error) {
+        console.error('Unable to save the delivery address', error);
+        toast.error('The address could not be saved in this browser. Please try again.');
+        return;
+      }
+      setIsEditingAddress(false);
       toast.success('Delivery address saved!');
     } else {
       toast.error('Please fix errors in delivery address');
@@ -212,7 +233,7 @@ const CheckoutPage = () => {
   };
 
   // ── Central Order Execution Function ──
-  const executeOrderPlacement = (paymentMethodLabel, isCod = false) => {
+  const executeOrderPlacement = (paymentMethodLabel, paymentStatus = 'Pending') => {
     if (unavailableItems.length > 0) {
       toast.error('An item in your order is no longer available.');
       return;
@@ -224,6 +245,7 @@ const CheckoutPage = () => {
         items: activeItems,
         address,
         paymentMethod: paymentMethodLabel,
+        paymentStatus,
         subtotal: activeSubtotal,
         discount: activeDiscount,
         cgst: activeCgst,
@@ -234,19 +256,27 @@ const CheckoutPage = () => {
         userEmail: user?.email || user?.identifier || `${address.name.toLowerCase().replace(/\s+/g, '')}@protinut.in`
       });
 
+      if (!order) {
+        setIsPlacingOrder(false);
+        toast.error('We could not save your order. Please try again.');
+        return;
+      }
+
       if (buyNowItem) {
         try { sessionStorage.removeItem('protinut_buy_now_item'); } catch (e) {}
+      } else {
+        clearCart();
       }
 
       setIsPlacingOrder(false);
       setPlacedOrder(order);
-      if (isCod) {
+      if (paymentStatus === 'Unpaid') {
         toast.success('Order Placed Successfully (COD)!');
       } else {
         toast.success('🎉 Order Placed Successfully!');
       }
       navigate('/order-success', { state: { order } });
-    }, isCod ? 1000 : 300);
+    }, paymentStatus === 'Unpaid' ? 1000 : 300);
   };
 
   // ── Dummy Gateway Simulation Handlers ──
@@ -263,7 +293,7 @@ const CheckoutPage = () => {
       paymentLabel = `Net Banking (${selectedBank})`;
     }
 
-    executeOrderPlacement(paymentLabel, false);
+    executeOrderPlacement(paymentLabel, 'Successful');
   };
 
   const handlePaymentFailure = () => {
@@ -315,7 +345,10 @@ const CheckoutPage = () => {
     // Save validated address to localStorage
     try {
       localStorage.setItem('protinut_delivery_address', JSON.stringify(address));
-    } catch {}
+    } catch (error) {
+      console.error('Unable to save the delivery address for future checkouts', error);
+      toast.error('Your order can proceed, but this address could not be saved for future checkouts.');
+    }
 
     // ── CASE 1: Cash on Delivery (COD) ──
     if (paymentMethod === 'cod') {
@@ -335,7 +368,7 @@ const CheckoutPage = () => {
       }
 
       // Directly place COD order with loading spinner
-      executeOrderPlacement('Cash on Delivery (COD)', true);
+      executeOrderPlacement('Cash on Delivery (COD)', 'Unpaid');
       return;
     }
 
@@ -428,7 +461,7 @@ const CheckoutPage = () => {
             </button>
 
             <button
-              onClick={() => navigate(`/orders/${placedOrder.id}`)}
+              onClick={() => navigate(`/track-order/${encodeURIComponent(placedOrder.id)}`)}
               className="bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 font-bold text-sm px-6 py-3 rounded-lg shadow-sm transition flex items-center justify-center gap-2"
             >
               <span>Track Order Live</span>

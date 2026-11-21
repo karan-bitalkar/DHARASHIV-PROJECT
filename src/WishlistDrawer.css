@@ -357,6 +357,7 @@
 }
 
 .wishlist-card-name {
+  display: block;
   font-size: 13px;
   font-weight: 700;
   color: #1a1a1a;
@@ -365,6 +366,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none;
 }
 
 .wishlist-card-weight {

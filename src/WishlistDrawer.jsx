@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './WishlistDrawer.css';
 
 const WishlistDrawer = ({
@@ -71,6 +71,11 @@ const WishlistDrawer = ({
         }, 2000);
       }
     }
+  };
+
+  const handleOpenProduct = (item) => {
+    onClose();
+    navigate(`/product/${encodeURIComponent(item.id)}`);
   };
 
   const showToast = (message, type) => {
@@ -188,6 +193,9 @@ const WishlistDrawer = ({
                     <div
                       key={item.id}
                       className={`wishlist-product-card ${!inStock ? 'out-of-stock' : ''}`}
+                      onClick={(event) => {
+                        if (!event.target.closest('button, a')) handleOpenProduct(item);
+                      }}
                     >
                       {/* Remove Heart Button */}
                       <button
@@ -210,7 +218,7 @@ const WishlistDrawer = ({
                       )}
 
                       {/* Product Thumbnail */}
-                      <div className="wishlist-card-thumb">
+                      <Link to={`/product/${encodeURIComponent(item.id)}`} className="wishlist-card-thumb">
                         <img
                           src={item.image}
                           alt={item.name}
@@ -219,11 +227,17 @@ const WishlistDrawer = ({
                           }}
                         />
                         {!inStock && <div className="oos-overlay">Out of Stock</div>}
-                      </div>
+                      </Link>
 
                       {/* Details */}
                       <div className="wishlist-card-info">
-                        <h4 className="wishlist-card-name" title={item.name}>{item.name}</h4>
+                        <Link
+                          to={`/product/${encodeURIComponent(item.id)}`}
+                          className="wishlist-card-name"
+                          title={item.name}
+                        >
+                          {item.name}
+                        </Link>
                         <span className="wishlist-card-weight">{item.weight || '550gm'}</span>
 
                         {/* Rating */}

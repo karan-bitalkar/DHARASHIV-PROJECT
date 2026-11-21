@@ -269,6 +269,7 @@
 }
 
 .wishlist-item-title {
+  display: block;
   font-family: 'Montserrat', sans-serif;
   font-size: 17px;
   font-weight: 800;
@@ -276,6 +277,7 @@
   margin: 0 0 10px;
   line-height: 1.3;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .wishlist-item-title:hover {
@@ -331,6 +333,9 @@
 }
 
 .btn-wishlist-quickview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   background: #ffffff;
   color: #3b2a21;
@@ -342,6 +347,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btn-wishlist-quickview:hover {

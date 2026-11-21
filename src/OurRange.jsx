@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAdminStore } from './AdminStoreContext';
 import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProductPurchasable } from './productAvailability';
@@ -484,6 +485,20 @@ const OurRange = ({
                 <div
                   key={item.id}
                   className={`range-product-card ${item.isCombo ? 'combo-highlight-card' : ''} ${!isAvailable ? 'card-unavailable' : ''}`}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`View ${item.name}`}
+                  onClick={(event) => {
+                    if (!event.target.closest('button, a, input, select, textarea')) {
+                      onQuickView?.(item);
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                      event.preventDefault();
+                      onQuickView?.(item);
+                    }
+                  }}
                 >
                   
                   {/* Card Top: Badges & Actions */}
@@ -532,37 +547,24 @@ const OurRange = ({
                       </button>
 
                       {/* Quick View */}
-                      {onQuickView && (
-                        <button
-                          type="button"
-                          className="btn-icon-round"
-                          onClick={() => onQuickView({
-                            ...item,
-                            price: displayPrice,
-                            weight: matchedWeight.label,
-                            isAvailable: isAvailable
-                          })}
-                          title="Quick View Nutrition"
-                          aria-label="Quick View"
-                        >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                        </button>
-                      )}
+                      <Link
+                        to={`/product/${encodeURIComponent(item.id)}`}
+                        className="btn-icon-round"
+                        title="Quick View"
+                        aria-label={`Quick View ${item.name}`}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </Link>
                     </div>
                   </div>
 
                   {/* Product Image Stage */}
-                  <div
+                  <Link
+                    to={`/product/${encodeURIComponent(item.id)}`}
                     className="card-image-stage"
-                    onClick={() => onQuickView && onQuickView({
-                      ...item,
-                      price: displayPrice,
-                      weight: matchedWeight.label,
-                      isAvailable: isAvailable
-                    })}
                     title="Click for nutrition details"
                   >
                     <img
@@ -575,7 +577,7 @@ const OurRange = ({
                       }}
                     />
                     <span className="card-hover-hint">Quick View 👁️</span>
-                  </div>
+                  </Link>
 
                   {/* Card Content & Details */}
                   <div className="card-info-content">
@@ -588,7 +590,9 @@ const OurRange = ({
                     </div>
 
                     {/* Title */}
-                    <h3 className="card-product-title">{item.name}</h3>
+                    <h3 className="card-product-title">
+                      <Link to={`/product/${encodeURIComponent(item.id)}`}>{item.name}</Link>
+                    </h3>
                     <p className="card-product-desc">{item.description}</p>
 
                     {/* Micro Nutrition Badges */}

@@ -11,10 +11,10 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
   const location = useLocation();
 
   // Retrieve initial reviews dataset
-  const baseData = initialReviewsByProduct[productId] || initialReviewsByProduct['classy-crunch'];
+  const baseData = initialReviewsByProduct[productId];
 
-  const [reviewsList, setReviewsList] = useState(baseData.reviews);
-  const [totalReviewsCount, setTotalReviewsCount] = useState(baseData.totalReviews);
+  const [reviewsList, setReviewsList] = useState(baseData?.reviews || []);
+  const [totalReviewsCount, setTotalReviewsCount] = useState(baseData?.totalReviews || 0);
   const [isWriteModalOpen, setIsWriteModalOpen] = useState(false);
 
   // Review Form State
@@ -80,11 +80,11 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
 
     const newReview = {
       id: `rev-user-${Date.now()}`,
-      userName: user?.name || 'Verified Customer',
-      userRole: 'Verified Buyer',
+      userName: user?.name || 'Customer',
+      userRole: 'Customer',
       avatarInitial: user?.name ? user.name.charAt(0).toUpperCase() : 'U',
       avatarBg: '#ef5323',
-      verified: true,
+      verified: false,
       date: 'Just Now',
       rating: formRating,
       title: formTitle.trim(),
@@ -151,18 +151,48 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
     });
   };
 
-  const handleSimulatedPhotoUpload = () => {
-    setAttachedPhoto('/products/classy-crunch.png');
-    toast.success('Product photo attached!', {
-      duration: 2500,
-      style: {
-        background: '#15803d',
-        color: '#ffffff',
-        borderRadius: '10px',
-        fontSize: '12px'
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Choose an image file to attach.');
+      event.target.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Choose an image smaller than 5 MB.');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setAttachedPhoto(reader.result);
+      } else {
+        toast.error('Unable to preview this image.');
       }
-    });
+    };
+    reader.onerror = () => toast.error('Unable to read this image.');
+    reader.readAsDataURL(file);
+    event.target.value = '';
   };
+
+  if (!baseData) {
+    return (
+      <section className="product-reviews-section" id="reviews-section" aria-label="Customer Reviews & Ratings">
+        <div className="reviews-section-container">
+          <div className="reviews-header-row">
+            <div>
+              <span className="reviews-badge">CUSTOMER FEEDBACK</span>
+              <h2 className="reviews-title">Ratings &amp; Customer Reviews</h2>
+            </div>
+          </div>
+          <p className="reviews-subtitle">Review details are not available for this product yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="product-reviews-section" id="reviews-section" aria-label="Customer Reviews & Ratings">
@@ -198,7 +228,7 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
               ))}
             </div>
             <span className="rating-total-count">
-              Based on <strong>{totalReviewsCount}</strong> verified reviews
+              Based on <strong>{totalReviewsCount}</strong> reviews
             </span>
             <span className="recommendation-pill">
               🌿 98% of buyers recommend this jar
@@ -234,13 +264,8 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
           <div className="rating-assurance-column">
             <div className="assurance-card">
               <span className="assurance-icon">🛡️</span>
-              <h4>100% Genuine Reviews</h4>
-              <p>Every review is verified from real purchasers of PROTINUT™ jars in India.</p>
-              <div className="assurance-points">
-                <span>✓ Verified Purchase Tracking</span>
-                <span>✓ Zero Paid Influencer Hype</span>
-                <span>✓ FSSAI Certified Recipe</span>
-              </div>
+              <h4>Review verification</h4>
+              <p>Purchase verification is not connected in this frontend.</p>
             </div>
           </div>
 
@@ -269,7 +294,7 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
                   <div className="user-meta-info">
                     <div className="user-name-row">
                       <strong className="user-name">{rev.userName}</strong>
-                      {rev.verified && (
+                      {rev.verified === true && rev.purchaseVerified === true && (
                         <span className="verified-buyer-pill">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12" />
@@ -422,17 +447,14 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
                 />
               </div>
 
-              {/* Add Photo Button (Dummy attachment) */}
+              {/* Add Photo Button */}
               <div className="form-group-photo">
                 <label className="form-label">Add Photo (Optional)</label>
                 <div className="photo-upload-row">
-                  <button
-                    type="button"
-                    className="btn-add-photo-dummy"
-                    onClick={handleSimulatedPhotoUpload}
-                  >
+                  <label className="btn-add-photo-dummy">
+                    <input type="file" accept="image/*" className="sr-only" onChange={handlePhotoUpload} />
                     <span>📷 Upload Photo</span>
-                  </button>
+                  </label>
                   {attachedPhoto && (
                     <div className="photo-attached-preview">
                       <span>✓ 1 photo attached</span>
@@ -450,7 +472,7 @@ const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Pean
 
               {/* Reviewer Notice */}
               <div className="reviewer-posting-as">
-                <span>Posting publicly as: <strong>{user?.name || 'Verified Customer'}</strong> (✓ Verified Buyer)</span>
+                <span>Posting publicly as: <strong>{user?.name || 'Customer'}</strong></span>
               </div>
 
               {/* Submit Review Button */}

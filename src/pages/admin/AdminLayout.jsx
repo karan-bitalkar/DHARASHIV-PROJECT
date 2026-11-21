@@ -98,6 +98,7 @@ const AdminLayout = ({ children, activeTab, searchQuery, onSearchChange }) => {
             <span aria-hidden="true">⌕</span>
             <input
               type="search"
+              aria-label="Search products, orders, customers"
               placeholder="Search products, orders, customers..."
               value={searchQuery}
               onChange={(event) => onSearchChange(event.target.value)}

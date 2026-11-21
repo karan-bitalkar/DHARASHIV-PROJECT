@@ -5,12 +5,14 @@ import { useCart } from '../CartContext';
 import { useOrders } from '../OrderContext';
 import toast from 'react-hot-toast';
 import InvoiceModal from '../InvoiceModal';
+import { getCustomerOrders } from '../orderOwnership';
 import './Pages.css';
 
 const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart }) => {
   const { user, logout } = useAuth();
   const { totalCartCount, resetCart } = useCart();
-  const { orders, resetOrders } = useOrders();
+  const { orders } = useOrders();
+  const customerOrders = getCustomerOrders(orders, user);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -28,15 +30,6 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
     }
   };
 
-  const handleResetForTesting = () => {
-    if (window.confirm('Reset Cart, Wishlist, and Orders to 0 items to test fresh login?')) {
-      if (resetCart) resetCart();
-      if (resetOrders) resetOrders();
-      if (onClearWishlist) onClearWishlist();
-      toast.success('State reset to 0 items across Cart, Wishlist, and Orders!');
-    }
-  };
-
   const handleCartAction = () => {
     if (onOpenCart) {
       onOpenCart();
@@ -46,7 +39,7 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
   };
 
   const handleInvoiceAction = () => {
-    if (orders.length > 0) {
+    if (customerOrders.length > 0) {
       setIsInvoiceOpen(true);
     } else {
       toast.error('No orders placed yet. Please place an order first!');
@@ -107,15 +100,6 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
               </div>
             </div>
 
-            {/* Test Reset Button */}
-            <button
-              type="button"
-              onClick={handleResetForTesting}
-              title="Reset state to 0 for testing"
-              className="hidden lg:inline-flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300 transition"
-            >
-              🔄 Reset
-            </button>
           </div>
         </div>
 
@@ -128,7 +112,7 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
           >
             <span className="text-[10px] sm:text-xs font-bold text-[#8c7a6e] uppercase tracking-wider">Orders</span>
             <span className="font-['Montserrat'] text-xl sm:text-2xl font-black text-[#2b1810] my-0.5">
-              {orders.length}
+              {customerOrders.length}
             </span>
             <span className="text-[10px] sm:text-xs text-[#ef5323] font-bold">Past Orders</span>
           </Link>
@@ -180,9 +164,9 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {orders.length > 0 && (
+              {customerOrders.length > 0 && (
                 <span className="bg-orange-100 text-[#ef5323] text-xs font-black px-2.5 py-0.5 rounded-full">
-                  {orders.length}
+                  {customerOrders.length}
                 </span>
               )}
               <svg className="w-5 h-5 text-gray-400 group-hover:text-[#ef5323] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,11 +330,11 @@ const AccountPage = ({ wishlistCount = 0, onClearWishlist, onLogout, onOpenCart 
       </div>
 
       {/* Official Tax Invoice Modal */}
-      {isInvoiceOpen && orders.length > 0 && (
+      {isInvoiceOpen && customerOrders.length > 0 && (
         <InvoiceModal
           isOpen={isInvoiceOpen}
           onClose={() => setIsInvoiceOpen(false)}
-          order={orders[0]}
+          order={customerOrders[0]}
         />
       )}
     </div>

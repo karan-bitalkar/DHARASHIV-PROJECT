@@ -1,0 +1,292 @@
+.admin-india-sales {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.admin-india-sales-heading,
+.admin-india-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-india-sales-heading h2 {
+  margin: 0;
+  color: #2b211e;
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 900;
+}
+
+.admin-india-sales-heading p,
+.admin-india-panel-heading p {
+  margin: 5px 0 0;
+  color: #716963;
+  font-size: 12px;
+}
+
+.admin-india-range-control,
+.admin-india-custom-range label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #605853;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-india-range-control select,
+.admin-india-custom-range input {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #e5dfd4;
+  border-radius: 8px;
+  background: #fff;
+  color: #352a25;
+  font: inherit;
+}
+
+.admin-india-custom-range {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-india-method-note {
+  margin: -5px 0 0;
+  color: #77716c;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.admin-india-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-india-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-india-summary-grid .admin-stat-card {
+  min-width: 0;
+}
+
+.admin-india-summary-grid .admin-summary-copy {
+  min-width: 0;
+}
+
+.admin-india-summary-grid .admin-stat-card strong.admin-india-top-state {
+  overflow: hidden;
+  font-size: clamp(13px, 1.4vw, 19px);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-india-panel {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e8e4dc;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(62, 39, 35, 0.035);
+}
+
+.admin-india-panel-heading {
+  margin-bottom: 10px;
+}
+
+.admin-india-panel-heading h3 {
+  margin: 0;
+  color: #2b211e;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.admin-india-chart-scroll,
+.admin-india-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.admin-india-chart {
+  display: block;
+  max-width: none;
+  overflow: visible;
+}
+
+.admin-india-gridline {
+  stroke: #ece9e2;
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.admin-india-baseline {
+  stroke: #c9c1b6;
+  stroke-width: 1.2;
+}
+
+.admin-india-axis-label {
+  fill: #77716c;
+  font-size: 10px;
+}
+
+.admin-india-y-axis-title {
+  fill: #665e57;
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.admin-india-bar {
+  fill: #ed6b2e;
+  transition: fill 0.18s ease, opacity 0.18s ease;
+}
+
+.admin-india-bar-group.is-top-state .admin-india-bar {
+  fill: #15734a;
+}
+
+.admin-india-bar-group:hover .admin-india-bar {
+  fill: #b94a20;
+}
+
+.admin-india-bar-group.is-top-state:hover .admin-india-bar {
+  fill: #0b5736;
+}
+
+.admin-india-state-label {
+  fill: #5d554f;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.admin-india-revenue-label {
+  fill: #4a413b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.admin-india-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #3c332e;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-india-table th,
+.admin-india-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid #eee9e1;
+}
+
+.admin-india-table thead th {
+  background: #f8f5ef;
+  color: #695e55;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.admin-india-table tbody th {
+  color: #2b211e;
+  font-weight: 800;
+}
+
+.admin-india-table tfoot th,
+.admin-india-table tfoot td {
+  border-top: 1px solid #dcd4c9;
+  border-bottom: 0;
+  background: #fbf8f2;
+  color: #2b211e;
+  font-weight: 900;
+}
+
+.admin-india-data-note,
+.admin-india-message {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid #e8e4dc;
+  border-radius: 9px;
+  background: #fff;
+  color: #665e57;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.admin-india-data-note {
+  border-color: #f1d7a8;
+  background: #fffaf0;
+  color: #795b27;
+}
+
+.admin-india-message.is-error {
+  border-color: #edc8c3;
+  background: #fff5f4;
+  color: #9c3025;
+}
+
+.admin-india-skeleton {
+  height: 96px;
+  border-radius: 11px;
+  background: linear-gradient(90deg, #f1eee8 25%, #faf9f6 50%, #f1eee8 75%);
+  background-size: 200% 100%;
+  animation: admin-india-shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes admin-india-shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (max-width: 900px) {
+  .admin-india-summary-grid,
+  .admin-india-skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-india-sales-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-india-range-control {
+    justify-content: space-between;
+  }
+
+  .admin-india-custom-range {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .admin-india-custom-range label {
+    flex: 1;
+    min-width: 140px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-india-custom-range input {
+    width: 100%;
+  }
+
+  .admin-india-panel {
+    padding: 12px;
+  }
+
+  .admin-india-summary-grid .admin-stat-card {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

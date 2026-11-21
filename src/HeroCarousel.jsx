@@ -89,12 +89,6 @@ const HeroCarousel = () => {
                 draggable={false}
               />
             </div>
-            {i === current && (settings.homeHeroHeading || settings.homeHeroSubtitle) && (
-              <div className="hero-cms-copy">
-                <h1>{settings.homeHeroHeading}</h1>
-                <p>{settings.homeHeroSubtitle}</p>
-              </div>
-            )}
           </div>
         ))}
       </div>

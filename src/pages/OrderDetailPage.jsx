@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useOrders } from '../OrderContext';
+import { useAuth } from '../AuthContext';
 import InvoiceModal from '../InvoiceModal';
 import CancelOrderModal from '../CancelOrderModal';
+import { getCancellationPaymentInfo } from '../orderCancellation';
+import { isOrderOwnedByUser } from '../orderOwnership';
 import toast from 'react-hot-toast';
 
 const STEPS = [
@@ -16,6 +19,7 @@ const STEPS = [
 const OrderDetailPage = () => {
   const { orderId } = useParams();
   const { getOrderById, cancelOrder } = useOrders();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
@@ -25,7 +29,8 @@ const OrderDetailPage = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [orderId]);
 
-  const order = getOrderById(orderId);
+  const storedOrder = getOrderById(orderId);
+  const order = isOrderOwnedByUser(storedOrder, user) ? storedOrder : null;
 
   if (!order) {
     return (
@@ -48,6 +53,7 @@ const OrderDetailPage = () => {
   }
 
   const isCancelled = order.status === 'Cancelled';
+  const cancellationPaymentInfo = getCancellationPaymentInfo(order);
   let currentStepIdx = order.statusIndex;
   if (order.status === 'Order Placed') currentStepIdx = 0;
   else if (order.status === 'Processing') currentStepIdx = 1;
@@ -136,11 +142,28 @@ const OrderDetailPage = () => {
               <span className="text-xl">⚠️</span>
               <div>
                 <strong className="text-sm font-bold block">
-                  This order has been cancelled {order.cancelReason ? `(${order.cancelReason})` : ''}
+                  This order has been cancelled {order.cancellationReason ? `(${order.cancellationReason})` : ''}
                 </strong>
-                <p className="text-xs text-red-700 mt-0.5">
-                  Refund of ₹{order.pricing.grandTotal} will be credited to your original payment method ({order.paymentMethod}) within 2-4 business days.
-                </p>
+                {cancellationPaymentInfo.type === 'cod' && (
+                  <p className="text-xs text-red-700 mt-0.5">
+                    No refund is applicable because payment has not been collected.
+                  </p>
+                )}
+                {cancellationPaymentInfo.type === 'prepaid-success' && (
+                  <p className="text-xs text-red-700 mt-0.5">
+                    Eligible refund: ₹{cancellationPaymentInfo.eligibleRefundAmount.toFixed(2)} to the original payment method ({cancellationPaymentInfo.paymentMethod || 'Not recorded'}). Refund processing must be confirmed separately.
+                  </p>
+                )}
+                {cancellationPaymentInfo.type === 'amount-unavailable' && (
+                  <p className="text-xs text-red-700 mt-0.5">
+                    Payment was successful, but the eligible refund amount cannot be calculated from this order.
+                  </p>
+                )}
+                {cancellationPaymentInfo.type === 'not-successful' && (
+                  <p className="text-xs text-red-700 mt-0.5">
+                    No refund is shown because payment is not recorded as successful (status: {cancellationPaymentInfo.paymentStatus}).
+                  </p>
+                )}
               </div>
             </div>
           )}

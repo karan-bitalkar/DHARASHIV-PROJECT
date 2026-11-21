@@ -4,6 +4,7 @@ import { useOrders } from '../OrderContext';
 import { useAuth } from '../AuthContext';
 import InvoiceModal from '../InvoiceModal';
 import toast from 'react-hot-toast';
+import { getCustomerOrders, isOrderOwnedByUser } from '../orderOwnership';
 
 const OrderSuccessPage = () => {
   const location = useLocation();
@@ -19,8 +20,12 @@ const OrderSuccessPage = () => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
-  // Use order passed from navigation state, or fall back to the most recent order
-  const order = location.state?.order || (orders.length > 0 ? orders[0] : null);
+  const customerOrders = getCustomerOrders(orders, user);
+  const stateOrder = location.state?.order;
+  const ownedStateOrder = isOrderOwnedByUser(stateOrder, user)
+    ? customerOrders.find((savedOrder) => savedOrder.id === stateOrder.id) || stateOrder
+    : null;
+  const order = ownedStateOrder || customerOrders[0] || null;
 
   if (!order) {
     return (
@@ -127,16 +132,18 @@ const OrderSuccessPage = () => {
               <span>🧾 Download Tax Invoice</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => navigate(`/orders/${order.id}`)}
-              className="bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-lg shadow-sm transition flex items-center gap-2"
-            >
-              <span>🚚 Track Order Live</span>
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
+            {order.status !== 'Cancelled' && (
+              <button
+                type="button"
+                onClick={() => navigate(`/track-order/${encodeURIComponent(order.id)}`)}
+                className="bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-lg shadow-sm transition flex items-center gap-2"
+              >
+                <span>🚚 Track Order Live</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+            )}
 
             <Link
               to="/orders"
@@ -289,7 +296,7 @@ const OrderSuccessPage = () => {
               </div>
 
               <div className="flex justify-between text-base font-black text-gray-900 pt-3 border-t border-dashed border-gray-200 font-['Montserrat']">
-                <span>Total Amount Paid</span>
+                <span>Order Total</span>
                 <span className="text-primary text-xl">₹{Number(pricing.grandTotal).toFixed(2)}</span>
               </div>
             </div>

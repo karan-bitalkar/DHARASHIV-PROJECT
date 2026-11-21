@@ -92,7 +92,6 @@ const featuredProducts = [
 const FeaturedShowcase = ({
   onAddToCart,
   onBuyNow,
-  onQuickView,
   wishlistItems = [],
   onToggleWishlist
 }) => {
@@ -163,31 +162,6 @@ const FeaturedShowcase = ({
     }
   };
 
-  const handleQuickViewClick = (prod) => {
-    const weight = selectedWeights[prod.id] || '550gm';
-    const price = weight === '1kg' ? prod.price1kg : prod.price550;
-
-    if (onQuickView) {
-      onQuickView({
-        id: prod.id,
-        name: prod.name,
-        category: 'Peanut Butter',
-        price: price,
-        weight: weight,
-        rating: prod.rating,
-        reviewsCount: prod.reviewsCount,
-        image: prod.image,
-        studioImage: prod.image,
-        tag: prod.badge,
-        color: prod.themeColor,
-        stockStatus: getProductStockStatus(prod),
-        isAvailable: isProductPurchasable(prod),
-        isOutOfStock: !isProductPurchasable(prod),
-        description: prod.flavorNotes
-      });
-    }
-  };
-
   return (
     <section className="featured-showcase-section" id="featured-products">
       {/* Ambient background glows */}
@@ -246,7 +220,9 @@ const FeaturedShowcase = ({
                 </div>
 
                 {/* Title & Tagline */}
-                <h3 className="pane-product-title">{prod.name}</h3>
+                <h3 className="pane-product-title">
+                  <Link to={`/product/${encodeURIComponent(prod.id)}`}>{prod.name}</Link>
+                </h3>
                 <p className="pane-product-tagline" style={{ color: prod.themeColor }}>
                   {prod.tagline}
                 </p>
@@ -385,13 +361,9 @@ const FeaturedShowcase = ({
                       ⚡ Buy Now
                     </button>
 
-                    <button
-                      type="button"
-                      className="pane-btn-quickview"
-                      onClick={() => handleQuickViewClick(prod)}
-                    >
+                    <Link to={`/product/${encodeURIComponent(prod.id)}`} className="pane-btn-quickview">
                       Quick View
-                    </button>
+                    </Link>
 
                     <button
                       type="button"
@@ -442,12 +414,9 @@ const FeaturedShowcase = ({
 
                   {/* Clean, Full-frame Hero Image */}
                   <div className="photo-image-frame">
-                    <img
-                      src={prod.image}
-                      alt={prod.name}
-                      className="product-hero-photo"
-                      loading="lazy"
-                    />
+                    <Link to={`/product/${encodeURIComponent(prod.id)}`} className="product-hero-link">
+                      <img src={prod.image} alt={prod.name} className="product-hero-photo" loading="lazy" />
+                    </Link>
                   </div>
 
                   {/* Bottom Feature Bar */}
@@ -505,12 +474,9 @@ const FeaturedShowcase = ({
 
                   {/* Clean, Full-frame Hero Image */}
                   <div className="photo-image-frame">
-                    <img
-                      src={prod.image}
-                      alt={prod.name}
-                      className="product-hero-photo"
-                      loading="lazy"
-                    />
+                    <Link to={`/product/${encodeURIComponent(prod.id)}`} className="product-hero-link">
+                      <img src={prod.image} alt={prod.name} className="product-hero-photo" loading="lazy" />
+                    </Link>
                   </div>
 
                   {/* Bottom Feature Bar */}
@@ -542,7 +508,9 @@ const FeaturedShowcase = ({
                 </div>
 
                 {/* Title & Tagline */}
-                <h3 className="pane-product-title">{prod.name}</h3>
+                <h3 className="pane-product-title">
+                  <Link to={`/product/${encodeURIComponent(prod.id)}`}>{prod.name}</Link>
+                </h3>
                 <p className="pane-product-tagline" style={{ color: prod.themeColor }}>
                   {prod.tagline}
                 </p>
@@ -681,13 +649,9 @@ const FeaturedShowcase = ({
                       ⚡ Buy Now
                     </button>
 
-                    <button
-                      type="button"
-                      className="pane-btn-quickview"
-                      onClick={() => handleQuickViewClick(prod)}
-                    >
+                    <Link to={`/product/${encodeURIComponent(prod.id)}`} className="pane-btn-quickview">
                       Quick View
-                    </button>
+                    </Link>
 
                     <button
                       type="button"

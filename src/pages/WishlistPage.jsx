@@ -5,8 +5,7 @@ import './WishlistPage.css';
 const WishlistPage = ({
   wishlistItems = [],
   onAddToCart,
-  onToggleWishlist,
-  onQuickView
+  onToggleWishlist
 }) => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -81,19 +80,19 @@ const WishlistPage = ({
                 )}
 
                 {/* Image */}
-                <div 
+                <Link
+                  to={`/product/${encodeURIComponent(item.id)}`}
                   className="wishlist-card-image-box"
-                  onClick={() => onQuickView && onQuickView(item)}
                 >
                   <img src={item.image} alt={item.name} className="wishlist-item-img" />
-                </div>
+                </Link>
 
                 {/* Details */}
                 <div className="wishlist-card-details">
                   <span className="wishlist-item-weight">{item.weight || '550gm'}</span>
-                  <h3 className="wishlist-item-title" onClick={() => onQuickView && onQuickView(item)}>
+                  <Link to={`/product/${encodeURIComponent(item.id)}`} className="wishlist-item-title">
                     {item.name}
-                  </h3>
+                  </Link>
 
                   <div className="wishlist-price-row">
                     <span className="wishlist-current-price">₹{item.price || 250}</span>
@@ -122,13 +121,9 @@ const WishlistPage = ({
                     >
                       Move to Cart 🛍️
                     </button>
-                    <button
-                      type="button"
-                      className="btn-wishlist-quickview"
-                      onClick={() => onQuickView && onQuickView(item)}
-                    >
+                    <Link to={`/product/${encodeURIComponent(item.id)}`} className="btn-wishlist-quickview">
                       Quick View
-                    </button>
+                    </Link>
                   </div>
                 </div>
 

@@ -4,6 +4,7 @@ import { useOrders } from '../OrderContext';
 import { useAuth } from '../AuthContext';
 import InvoiceModal from '../InvoiceModal';
 import CancelOrderModal from '../CancelOrderModal';
+import { getCustomerOrders } from '../orderOwnership';
 
 const OrdersPage = () => {
   const { orders, cancelOrder } = useOrders();
@@ -13,12 +14,7 @@ const OrdersPage = () => {
 
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState(null);
   const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
-  const customerOrders = useMemo(() => {
-    const email = String(user?.email || user?.identifier || '').trim().toLowerCase();
-    return email
-      ? orders.filter((order) => String(order.userEmail || '').trim().toLowerCase() === email)
-      : orders;
-  }, [orders, user?.email, user?.identifier]);
+  const customerOrders = useMemo(() => getCustomerOrders(orders, user), [orders, user]);
   const completedOrders = customerOrders.filter((order) => order.status === 'Delivered').length;
   const cancelledOrders = customerOrders.filter((order) => order.status === 'Cancelled').length;
   const pendingOrders = customerOrders.filter((order) => (
@@ -234,15 +230,17 @@ const OrdersPage = () => {
                       )}
 
                       {/* Track Order Live Button */}
-                      <Link
-                        to={`/track-order/${order.id}`}
-                        className="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary-hover rounded-lg shadow-sm transition flex items-center gap-1.5"
-                      >
-                        <span>Track Order Live</span>
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Link>
+                      {!isCancelled && (
+                        <Link
+                          to={`/track-order/${order.id}`}
+                          className="px-5 py-2.5 text-xs font-bold text-white bg-primary hover:bg-primary-hover rounded-lg shadow-sm transition flex items-center gap-1.5"
+                        >
+                          <span>Track Order Live</span>
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      )}
                     </div>
 
                   </div>

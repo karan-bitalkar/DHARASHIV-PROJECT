@@ -1,56 +1,101 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { MapContainer, Marker, Polyline, TileLayer, ZoomControl, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import {
+  CircleMarker,
+  MapContainer,
+  Polyline,
+  Popup,
+  TileLayer,
+  ZoomControl,
+  useMap
+} from 'react-leaflet';
 import { useOrders } from '../OrderContext';
+import { useAuth } from '../AuthContext';
+import { DEFAULT_PICKUP_LOCATION, MAP_TILE_URL } from '../trackingConfig';
+import { isOrderOwnedByUser } from '../orderOwnership';
 import 'leaflet/dist/leaflet.css';
 import './TrackingPage.css';
 
-const START_POSITION = [18.5793, 73.7484];
-const END_POSITION = [18.5204, 73.8567];
-const SIMULATED_ROUTE_KM = 5.2;
-const TRACKING_INTERVAL_MS = 2500;
 const STATUS_STEPS = ['Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
 
-const partnerIcon = L.divIcon({
-  className: 'tracking-marker-icon',
-  html: '<span class="tracking-scooter-marker" aria-label="Delivery partner location">●</span>',
-  iconSize: [36, 36],
-  iconAnchor: [18, 18]
-});
+const getCoordinatePair = (location) => {
+  const latitude = location?.latitude ?? location?.lat;
+  const longitude = location?.longitude ?? location?.lng ?? location?.lon;
+  if (latitude === null || latitude === undefined || latitude === '' || longitude === null || longitude === undefined || longitude === '') {
+    return null;
+  }
 
-const destinationIcon = L.divIcon({
-  className: 'tracking-marker-icon',
-  html: '<span class="tracking-destination-marker" aria-label="Delivery address"></span>',
-  iconSize: [22, 22],
-  iconAnchor: [11, 11]
-});
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return null;
+  }
+  return [lat, lng];
+};
 
-const getPositionAtProgress = (progress) => [
-  START_POSITION[0] + (END_POSITION[0] - START_POSITION[0]) * progress,
-  START_POSITION[1] + (END_POSITION[1] - START_POSITION[1]) * progress
-];
+const getRoadRoute = (geometry) => {
+  if (geometry?.type !== 'LineString' || !Array.isArray(geometry.coordinates) || geometry.coordinates.length < 2) {
+    return [];
+  }
 
-const MapViewport = ({ destination }) => {
+  const positions = geometry.coordinates.map((point) => (
+    Array.isArray(point) && point.length >= 2
+      ? getCoordinatePair({ longitude: point[0], latitude: point[1] })
+      : null
+  ));
+  return positions.every(Boolean) ? positions : [];
+};
+
+const formatDateTime = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+};
+
+const formatTimelineUpdate = (entry, isComplete) => {
+  const timestamp = entry?.updatedAt || entry?.timestamp;
+  if (timestamp) {
+    const hasTime = /T\d{2}:\d{2}| \d{1,2}:\d{2}/.test(String(timestamp));
+    if (hasTime) return formatDateTime(timestamp);
+  }
+  return entry?.date || (isComplete ? 'Completed' : 'Not updated');
+};
+
+const MapViewport = ({ positions }) => {
   const map = useMap();
 
   useEffect(() => {
-    map.fitBounds([START_POSITION, destination], { padding: [48, 48] });
-  }, [destination, map]);
+    if (positions.length > 1) {
+      map.fitBounds(positions, { padding: [40, 40], maxZoom: 13 });
+    }
+  }, [map, positions]);
 
   return null;
 };
 
-const StatusTimeline = ({ activeStep }) => (
+const StatusTimeline = ({ order, activeStep }) => (
   <ol className="tracking-timeline">
     {STATUS_STEPS.map((step, index) => {
-      const isComplete = index <= activeStep;
+      const entry = order.timeline?.find((item) => item.step === step);
+      const isComplete = order.status !== 'Cancelled' && index <= activeStep;
+      const isCurrent = order.status !== 'Cancelled' && index === activeStep;
       return (
-        <li className={`tracking-timeline-step${isComplete ? ' is-complete' : ''}`} key={step}>
+        <li
+          className={`tracking-timeline-step${isComplete ? ' is-complete' : ''}${isCurrent ? ' is-current' : ''}`}
+          key={step}
+        >
           <span className="tracking-timeline-marker" aria-hidden="true">
             {isComplete ? '✓' : ''}
           </span>
           <span className="tracking-timeline-label">{step}</span>
+          <span className="tracking-timeline-date">{formatTimelineUpdate(entry, isComplete)}</span>
           {index < STATUS_STEPS.length - 1 && <span className="tracking-timeline-connector" aria-hidden="true" />}
         </li>
       );
@@ -58,53 +103,68 @@ const StatusTimeline = ({ activeStep }) => (
   </ol>
 );
 
+const TrackingMap = ({ pickup, destination, route, driverLocation, driverUpdatedAt }) => {
+  const positions = useMemo(() => [pickup, ...route, destination], [pickup, route, destination]);
+  const [tileError, setTileError] = useState(false);
+
+  return (
+    <section className="tracking-map-section" aria-labelledby="tracking-map-title">
+      <div className="tracking-map-heading">
+        <div>
+          <p className="tracking-eyebrow">ORDER ROUTE</p>
+          <h2 id="tracking-map-title">Pickup to delivery</h2>
+        </div>
+        <span className="tracking-route-badge">Estimated road route · Not live GPS</span>
+      </div>
+
+      <div className="tracking-map-stage">
+        <MapContainer
+          center={route[0]}
+          zoom={11}
+          zoomControl={false}
+          scrollWheelZoom
+          className="tracking-map"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url={MAP_TILE_URL}
+            eventHandlers={{ tileerror: () => setTileError(true) }}
+          />
+          <MapViewport positions={positions} />
+          <ZoomControl position="topright" />
+          <Polyline positions={route} pathOptions={{ color: '#ef5323', weight: 6, opacity: 0.88 }} />
+          <CircleMarker center={pickup} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#15734a', fillOpacity: 1 }}>
+            <Popup><strong>PROTINUT Foods pickup</strong></Popup>
+          </CircleMarker>
+          <CircleMarker center={destination} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#ef5323', fillOpacity: 1 }}>
+            <Popup><strong>Customer delivery destination</strong></Popup>
+          </CircleMarker>
+          {driverLocation && (
+            <CircleMarker center={driverLocation} radius={7} pathOptions={{ color: '#fff', weight: 2, fillColor: '#2563eb', fillOpacity: 1 }}>
+              <Popup>
+                Last driver GPS update
+                {driverUpdatedAt ? `: ${formatDateTime(driverUpdatedAt)}` : ''}
+              </Popup>
+            </CircleMarker>
+          )}
+        </MapContainer>
+        {tileError && <p className="tracking-map-error" role="alert">Map tiles could not be loaded. Check the configured map tile service.</p>}
+        <div className="tracking-map-legend" aria-label="Map markers">
+          <span><i className="is-pickup" />Pickup</span>
+          <span><i className="is-destination" />Delivery</span>
+          {driverLocation && <span><i className="is-driver" />Last driver location</span>}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const TrackingPage = () => {
   const { orderId } = useParams();
   const { orders } = useOrders();
-  const order = orders.find((item) => item.id === orderId);
-  const [progress, setProgress] = useState(0.06);
-  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
-  const dragStartY = useRef(null);
-  const orderItems = Array.isArray(order?.items) ? order.items : [];
-  const address = order?.address;
-  const destination = END_POSITION;
-  const partnerPosition = useMemo(() => getPositionAtProgress(progress), [progress]);
-  const remainingKm = Math.max(0, SIMULATED_ROUTE_KM * (1 - progress));
-  const activeStep = order?.status === 'Cancelled'
-    ? -1
-    : ({ 'Order Placed': 0, Pending: 0, Processing: 1, Shipped: 2, 'Out for Delivery': 3, Delivered: 4 }[order?.status] ?? order?.statusIndex ?? 0);
-  const routeLine = [partnerPosition, destination];
-  const formattedAddress = address
-    ? [address.addressLine, address.city, address.state, address.pincode]
-      .filter((part, index, parts) => part && !parts.slice(0, index).some((previous) => (
-        previous.toLowerCase().includes(part.toLowerCase())
-      )))
-      .join(', ')
-    : 'Delivery address unavailable';
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setProgress((current) => Math.min(1, current + 0.025));
-    }, TRACKING_INTERVAL_MS);
-
-    return () => window.clearInterval(intervalId);
-  }, []);
-
-  const handleSheetPointerDown = (event) => {
-    dragStartY.current = event.clientY;
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleSheetPointerUp = (event) => {
-    if (dragStartY.current === null) return;
-    const dragDistance = dragStartY.current - event.clientY;
-    if (Math.abs(dragDistance) > 24) {
-      setIsSheetExpanded(dragDistance > 0);
-    } else {
-      setIsSheetExpanded((expanded) => !expanded);
-    }
-    dragStartY.current = null;
-  };
+  const { user } = useAuth();
+  const storedOrder = orders.find((item) => String(item.id) === orderId);
+  const order = isOrderOwnedByUser(storedOrder, user) ? storedOrder : null;
 
   if (!order) {
     return (
@@ -119,120 +179,151 @@ const TrackingPage = () => {
     );
   }
 
+  if (order.status === 'Cancelled') {
+    return (
+      <section className="tracking-not-found">
+        <div className="tracking-not-found-card">
+          <span className="tracking-not-found-icon" aria-hidden="true">×</span>
+          <h1>Live tracking is unavailable</h1>
+          <p>This order has been cancelled, so no live tracking information is available.</p>
+          <Link className="tracking-back-button" to="/orders">Back to My Orders</Link>
+        </div>
+      </section>
+    );
+  }
+
+  const address = order.address || {};
+  const pickupLocation = order.pickupLocation || DEFAULT_PICKUP_LOCATION;
+  const tracking = order.tracking || {};
+  const pickupCoordinates = getCoordinatePair(pickupLocation.coordinates || pickupLocation);
+  const destinationCoordinates = getCoordinatePair(address.coordinates || address);
+  const routeCoordinates = getRoadRoute(tracking.routeGeometry);
+  const driverCoordinates = getCoordinatePair(tracking.driverLocation);
+  const hasRouteData = Boolean(pickupCoordinates && destinationCoordinates && routeCoordinates.length > 1);
+  const canShowMap = hasRouteData && Boolean(MAP_TILE_URL);
+  const orderItems = Array.isArray(order.items) ? order.items : [];
+  const activeStep = order.status === 'Cancelled'
+    ? -1
+    : ({ 'Order Placed': 0, Pending: 0, Processing: 1, Shipped: 2, 'Out for Delivery': 3, Delivered: 4 }[order.status] ?? order.statusIndex ?? 0);
+  const fullAddress = [address.addressLine, address.city, address.state, address.pincode]
+    .filter((part) => typeof part === 'string' && part.trim())
+    .join(', ');
+  const distanceKm = Number(tracking.distanceKm);
+  const estimatedDurationMinutes = Number(tracking.estimatedDurationMinutes);
+  const distanceLabel = Number.isFinite(distanceKm) && distanceKm > 0 ? `${distanceKm.toFixed(1)} km` : 'Unavailable';
+  const etaLabel = tracking.estimatedDeliveryAt
+    ? formatDateTime(tracking.estimatedDeliveryAt)
+    : Number.isFinite(estimatedDurationMinutes) && estimatedDurationMinutes > 0
+      ? `${Math.round(estimatedDurationMinutes)} min`
+      : 'Unavailable';
+  const totalAmount = Number(order.pricing?.grandTotal ?? order.total ?? 0);
+  const isCod = /cash on delivery|\bcod\b/i.test(order.paymentMethod || '');
+
   return (
-    <section className="tracking-page" aria-label={`Live tracking for order ${order.id}`}>
-      <div className="tracking-map-panel">
-        <MapContainer
-          center={START_POSITION}
-          zoom={13}
-          zoomControl={false}
-          scrollWheelZoom
-          className="tracking-map"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapViewport destination={destination} />
-          <ZoomControl position="topright" />
-          <Polyline positions={routeLine} pathOptions={{ color: '#3E2723', weight: 5, opacity: 0.82 }} />
-          <Marker position={partnerPosition} icon={partnerIcon} />
-          <Marker position={destination} icon={destinationIcon} />
-        </MapContainer>
-        <Link className="tracking-map-back" to="/orders" aria-label="Back to My Orders">
-          <span aria-hidden="true">←</span> <span className="tracking-map-back-label">My Orders</span>
+    <section className="tracking-page" aria-label={`Order tracking for ${order.id}`}>
+      <main className="tracking-main">
+        <Link className="tracking-map-back" to="/orders">
+          <span aria-hidden="true">←</span> My Orders
         </Link>
-        <div className="tracking-map-badge">
-          <span className="tracking-live-dot" />
-          SIMULATED LIVE LOCATION
-        </div>
-        <div className="tracking-map-legend" aria-label="Map legend">
-          <span><i className="tracking-legend-partner" /> Partner</span>
-          <span><i className="tracking-legend-destination" /> Destination</span>
-        </div>
-      </div>
 
-      <aside
-        className={`tracking-details-panel${isSheetExpanded ? ' is-expanded' : ''}`}
-        aria-label="Tracking and order details"
-      >
-        <div
-          className="tracking-sheet-handle"
-          onPointerDown={handleSheetPointerDown}
-          onPointerUp={handleSheetPointerUp}
-          onPointerCancel={() => { dragStartY.current = null; }}
-          role="button"
-          tabIndex={0}
-          aria-label={isSheetExpanded ? 'Collapse tracking details' : 'Expand tracking details'}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              setIsSheetExpanded((expanded) => !expanded);
-            }
-          }}
-        >
-          <span className="tracking-sheet-grabber" />
-        </div>
+        {canShowMap ? (
+          <TrackingMap
+            pickup={pickupCoordinates}
+            destination={destinationCoordinates}
+            route={routeCoordinates}
+            driverLocation={driverCoordinates}
+            driverUpdatedAt={tracking.driverLocation?.updatedAt}
+          />
+        ) : (
+          <section className="tracking-map-section" aria-labelledby="tracking-map-title">
+            <div className="tracking-map-heading">
+              <div>
+                <p className="tracking-eyebrow">ORDER ROUTE</p>
+                <h2 id="tracking-map-title">Pickup to delivery</h2>
+              </div>
+              <span className="tracking-route-badge">Estimated route · Not live GPS</span>
+            </div>
+            <div className="tracking-map-unavailable" role="status">
+              <span className="tracking-location-icon" aria-hidden="true">↗</span>
+              <h3>Road route unavailable</h3>
+              <p>
+                A map route will appear when trusted pickup and delivery coordinates,
+                road-route geometry, and a private map tile service are available.
+                No straight-line route or live vehicle movement is shown.
+              </p>
+              {!pickupCoordinates && <small>Pickup coordinates are not available yet.</small>}
+              {!destinationCoordinates && <small>Delivery coordinates are not available for this order yet.</small>}
+              {pickupCoordinates && destinationCoordinates && routeCoordinates.length < 2 && (
+                <small>Actual road-route geometry is not available for this order yet.</small>
+              )}
+              {hasRouteData && !MAP_TILE_URL && <small>Configure VITE_OSM_TILE_URL with a trusted map tile endpoint to show the map.</small>}
+            </div>
+          </section>
+        )}
 
+        <div className="tracking-route-metrics">
+          <article>
+            <span>Total road distance</span>
+            <strong>{distanceLabel}</strong>
+          </article>
+          <article>
+            <span>Estimated delivery</span>
+            <strong>{etaLabel}</strong>
+          </article>
+          <p>Route estimates are not live vehicle tracking. GPS appears only when a real driver update is supplied.</p>
+        </div>
+      </main>
+
+      <aside className="tracking-details-panel" aria-label="Tracking and order details">
         <div className="tracking-details-scroll">
           <header className="tracking-details-header">
             <div>
               <p className="tracking-eyebrow">ORDER #{order.id}</p>
-              <h1>Track your delivery</h1>
+              <h1>Track your order</h1>
             </div>
-            <span className="tracking-live-status"><i /> {order.status || 'Order Placed'}</span>
+            <span className="tracking-live-status">{order.status || 'Order Placed'}</span>
           </header>
 
-          <section className="tracking-eta-card" aria-live="polite">
+          <section className="tracking-status-card" aria-live="polite">
             <div>
-              <p className="tracking-eyebrow">ESTIMATED ARRIVAL</p>
-              <strong>{order.status === 'Delivered' ? 'Delivered' : order.status || 'Order Placed'}</strong>
+              <p className="tracking-eyebrow">CURRENT ORDER STATUS</p>
+              <strong>{order.status || 'Order Placed'}</strong>
             </div>
-            <div className="tracking-distance">
-              <span>{remainingKm.toFixed(1)} km</span>
-              <small>remaining</small>
-            </div>
+            <small>
+              {order.statusUpdatedAt
+                ? `Updated ${formatDateTime(order.statusUpdatedAt)}`
+                : `Placed ${order.date || 'date unavailable'}`}
+            </small>
           </section>
+
+          {order.status === 'Cancelled' && (
+            <p className="tracking-cancelled-note">This order has been cancelled.</p>
+          )}
 
           <section className="tracking-section">
             <h2>Delivery progress</h2>
-            <StatusTimeline activeStep={activeStep} />
-            {order.status === 'Cancelled' && <p className="tracking-map-disclaimer">This order has been cancelled.</p>}
-            {order.trackingId && (
-              <p className="tracking-map-disclaimer">Tracking ID: <strong>{order.trackingId}</strong></p>
-            )}
+            <StatusTimeline order={order} activeStep={activeStep} />
           </section>
 
-          <section className="tracking-partner-card">
-            <div className="tracking-partner-avatar" aria-label="Delivery partner photo">
-              <svg viewBox="0 0 64 64" role="img" aria-hidden="true">
-                <circle cx="32" cy="32" r="32" fill="#F8F3E8" />
-                <path d="M12 59c2-12 9-18 20-18s18 6 20 18" fill="#F58220" />
-                <circle cx="32" cy="26" r="12" fill="#3E2723" />
-                <path d="M20 25c1-10 7-15 13-15 7 0 12 5 13 14-4-1-8-4-10-7-3 4-9 7-16 8Z" fill="#3E2723" />
-                <path d="M27 29c1 1 2 1 5 1s4 0 5-1" fill="none" stroke="#F8F3E8" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <div className="tracking-partner-info">
-              <p className="tracking-eyebrow">YOUR DELIVERY PARTNER</p>
-              <h2>Rahul Sharma <span>★ 4.8</span></h2>
-              <p>Scooter · MH-12-AB-1234</p>
-            </div>
-            <div className="tracking-partner-actions">
-              <a href="tel:+919876543210" aria-label="Call Rahul Sharma">
-                <span aria-hidden="true">☎</span><span>Call</span>
-              </a>
-              <a href="sms:+919876543210" aria-label="Message Rahul Sharma">
-                <span aria-hidden="true">✉</span><span>Message</span>
-              </a>
-            </div>
-          </section>
-
-          <section className="tracking-section tracking-delivery-address">
-            <h2>Delivering to</h2>
-            <p className="tracking-address-name">{address?.name || 'Customer'}</p>
-            <p>{formattedAddress}</p>
-            <p className="tracking-map-disclaimer">The map route uses demo coordinates; this is not GPS tracking.</p>
+          <section className="tracking-section tracking-locations">
+            <h2>Pickup and delivery locations</h2>
+            <article className="tracking-location-card">
+              <span className="tracking-location-dot is-pickup" aria-hidden="true" />
+              <div>
+                <p className="tracking-eyebrow">PICKUP</p>
+                <strong>{pickupLocation.name || DEFAULT_PICKUP_LOCATION.name}</strong>
+                <p>{pickupLocation.address || DEFAULT_PICKUP_LOCATION.address}</p>
+              </div>
+            </article>
+            <article className="tracking-location-card">
+              <span className="tracking-location-dot is-destination" aria-hidden="true" />
+              <div>
+                <p className="tracking-eyebrow">DELIVERY DESTINATION</p>
+                <strong>{address.name || 'Customer'}</strong>
+                {address.mobile && <p className="tracking-address-mobile">{address.mobile}</p>}
+                <p>{fullAddress || 'Delivery address unavailable'}</p>
+              </div>
+            </article>
           </section>
 
           <section className="tracking-section tracking-order-summary">
@@ -246,8 +337,8 @@ const TrackingPage = () => {
               ))}
             </ul>
             <div className="tracking-order-total">
-              <span>Total paid</span>
-              <strong>₹{Number(order.pricing?.grandTotal || 0).toFixed(2)}</strong>
+              <span>{isCod ? 'Total due on delivery' : 'Total amount paid'}</span>
+              <strong>₹{Number.isFinite(totalAmount) ? totalAmount.toFixed(2) : '0.00'}</strong>
             </div>
           </section>
         </div>

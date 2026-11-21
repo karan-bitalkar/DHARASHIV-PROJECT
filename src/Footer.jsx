@@ -14,7 +14,6 @@ const Footer = () => {
     if (email.trim()) {
       setSubscribed(true);
       setTimeout(() => setSubscribed(false), 3000);
-      setEmail('');
     }
   };
 
@@ -31,8 +30,8 @@ const Footer = () => {
 
           <form className="newsletter-form" onSubmit={handleSubmit}>
             {subscribed ? (
-              <div className="newsletter-success">
-                ✓ Welcome! Use coupon code <strong>PROTI10</strong> at checkout!
+              <div className="newsletter-success" role="status" aria-live="polite">
+                Newsletter signup is not connected yet. Your email was not submitted.
               </div>
             ) : (
               <div className="newsletter-input-box">

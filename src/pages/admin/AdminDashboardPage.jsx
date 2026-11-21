@@ -7,6 +7,7 @@ import { useGlobalSettings } from '../../GlobalSettingsContext';
 import { getDiscountPercent } from '../../productPricing';
 import { getProductStockStatus, isProductPurchasable, STOCK_STATUSES } from '../../productAvailability';
 import { initialReviewsByProduct } from '../../reviewsData';
+import StateWiseSalesAnalytics from './StateWiseSalesAnalytics';
 import './AdminPanel.css';
 
 const currency = (amount) => `₹${Number(amount || 0).toLocaleString('en-IN')}`;
@@ -224,8 +225,12 @@ const AdminDashboardPage = () => {
   };
 
   const setStatus = (orderId, status, trackingId) => {
-    updateOrderStatus(orderId, status, trackingId);
-    toast.success(`✅ Order ${orderId} updated to ${status}.`);
+    const saved = updateOrderStatus(orderId, status, trackingId);
+    if (saved) {
+      toast.success(`✅ Order ${orderId} updated to ${status}.`);
+    } else {
+      toast.error(`Could not save the status update for order ${orderId}.`);
+    }
   };
 
   const handleAddCustomer = (event) => {
@@ -368,6 +373,7 @@ const AdminDashboardPage = () => {
         <section className="admin-panel"><div className="admin-panel-heading"><h2>Sales Overview</h2><span className="admin-period-chip">Recent orders</span></div><SalesChart orders={orders} /></section>
         <section className="admin-panel"><div className="admin-panel-heading"><h2>Order Status</h2></div><OrderStatusChart orders={orders} /></section>
       </div>
+      <StateWiseSalesAnalytics orders={orders} getOrderAmount={orderAmount} />
     </>
   );
 
@@ -749,15 +755,19 @@ const SalesChart = ({ orders }) => {
 };
 
 const OrderStatusChart = ({ orders }) => {
+  const knownStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
   const segments = [
     { label: 'Pending', color: '#f5a623' },
     { label: 'Processing', color: '#54a6e8' },
     { label: 'Shipped', color: '#56c596' },
     { label: 'Delivered', color: '#07583e' },
-    { label: 'Cancelled', color: '#e75d57' }
+    { label: 'Cancelled', color: '#e75d57' },
+    { label: 'Other', color: '#9a8b7f' }
   ].map((segment) => ({
     ...segment,
-    count: orders.filter((order) => order.status === segment.label).length
+    count: segment.label === 'Other'
+      ? orders.filter((order) => !knownStatuses.includes(order.status)).length
+      : orders.filter((order) => order.status === segment.label).length
   }));
   const total = orders.length;
   let running = 0;

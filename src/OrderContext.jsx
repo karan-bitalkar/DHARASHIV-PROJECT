@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { DEFAULT_PICKUP_LOCATION } from './trackingConfig';
+import { isCodPaymentMethod } from './orderCancellation';
 
 const OrderContext = createContext(null);
 
@@ -20,6 +22,19 @@ export const OrderProvider = ({ children }) => {
       return [];
     }
   });
+  const ordersRef = useRef(orders);
+
+  const commitOrders = (nextOrders) => {
+    try {
+      localStorage.setItem('protinut_orders', JSON.stringify(nextOrders));
+    } catch (error) {
+      console.error('Error saving orders to localStorage', error);
+      return false;
+    }
+    ordersRef.current = nextOrders;
+    setOrders(nextOrders);
+    return true;
+  };
 
   useEffect(() => {
     try {
@@ -31,13 +46,14 @@ export const OrderProvider = ({ children }) => {
 
   useEffect(() => {
     const syncOrders = (event) => {
-      if (event.key !== 'protinut_orders' || !event.newValue) return;
+      if (event.key !== 'protinut_orders') return;
       try {
-        const nextOrders = JSON.parse(event.newValue);
+        const nextOrders = event.newValue ? JSON.parse(event.newValue) : [];
         if (Array.isArray(nextOrders)) {
-          setOrders((currentOrders) => (
-            JSON.stringify(currentOrders) === event.newValue ? currentOrders : nextOrders
-          ));
+          if (JSON.stringify(ordersRef.current) !== JSON.stringify(nextOrders)) {
+            ordersRef.current = nextOrders;
+            setOrders(nextOrders);
+          }
         }
       } catch (error) {
         console.error('Unable to sync orders from another browser tab', error);
@@ -47,7 +63,16 @@ export const OrderProvider = ({ children }) => {
     return () => window.removeEventListener('storage', syncOrders);
   }, []);
 
-  const placeOrder = ({ items, address, paymentMethod, subtotal, discount, deliveryCharge, userEmail }) => {
+  const placeOrder = ({
+    items,
+    address,
+    paymentMethod,
+    paymentStatus,
+    subtotal,
+    discount,
+    deliveryCharge,
+    userEmail
+  }) => {
     const uniqueDigits = Math.floor(100000 + Math.random() * 900000);
     const orderId = `ORD-${Date.now().toString().slice(-4)}${uniqueDigits}`;
     const now = new Date();
@@ -65,10 +90,12 @@ export const OrderProvider = ({ children }) => {
       id: orderId,
       invoiceNo: `INV-${uniqueDigits}`,
       date: formattedDate,
+      createdAt: now.toISOString(),
       invoiceDate: formattedDate,
       status: 'Order Placed',
       statusIndex: 0,
       canCancel: true,
+      pickupLocation: { ...DEFAULT_PICKUP_LOCATION },
       // Map strictly to the exact items the user bought:
       items: items.map(i => ({
         id: i.id,
@@ -89,6 +116,7 @@ export const OrderProvider = ({ children }) => {
       },
       userEmail: userEmail || address?.email || '',
       paymentMethod,
+      paymentStatus: paymentStatus || (isCodPaymentMethod(paymentMethod) ? 'Unpaid' : 'Not recorded'),
       pricing: {
         subtotal: subtotalAmount,
         discount: Number(discount || 0),
@@ -99,7 +127,7 @@ export const OrderProvider = ({ children }) => {
         grandTotal: Number((subtotalAmount + cgstAmount + sgstAmount + deliveryAmount).toFixed(2))
       },
       timeline: [
-        { step: 'Order Placed', date: formattedDate, desc: 'Your order has been received and confirmed.', completed: true },
+        { step: 'Order Placed', date: formattedDate, updatedAt: now.toISOString(), desc: 'Your order has been received and confirmed.', completed: true },
         { step: 'Processing', date: '', desc: '', completed: false },
         { step: 'Shipped', date: '', desc: '', completed: false },
         { step: 'Out for Delivery', date: '', desc: '', completed: false },
@@ -107,66 +135,88 @@ export const OrderProvider = ({ children }) => {
       ]
     };
 
-    setOrders((prev) => [newOrder, ...prev]);
+    if (!commitOrders([newOrder, ...ordersRef.current])) return null;
     return newOrder;
   };
 
   const cancelOrder = (orderId, reason = 'Customer requested cancellation') => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id === orderId) {
-          toast.success(`Order #${orderId} has been cancelled`, {
-            style: {
-              background: '#2b1810',
-              color: '#ffffff',
-              borderRadius: '12px',
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: '13px',
-              fontWeight: 700
-            }
-          });
-          return {
-            ...order,
-            status: 'Cancelled',
-            canCancel: false,
-            cancellationReason: reason,
-            cancelledAt: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-          };
+    const currentOrder = ordersRef.current.find((order) => order.id === orderId);
+    if (!currentOrder || currentOrder.status === 'Cancelled' || currentOrder.canCancel !== true) {
+      toast.error(currentOrder ? 'This order can no longer be cancelled.' : 'Order could not be found.');
+      return false;
+    }
+
+    const now = new Date();
+    const nextOrders = ordersRef.current.map((order) => (
+      order.id === orderId
+        ? {
+          ...order,
+          status: 'Cancelled',
+          canCancel: false,
+          cancellationReason: reason,
+          cancelledAt: now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          cancelledAtTime: now.toISOString(),
+          statusUpdatedAt: now.toISOString()
         }
-        return order;
-      })
-    );
+        : order
+    ));
+    const saved = commitOrders(nextOrders);
+
+    if (!saved) {
+      toast.error('Could not save this cancellation. Please try again.');
+      return false;
+    }
+    toast.success(`Order #${orderId} has been cancelled`, {
+      style: {
+        background: '#2b1810',
+        color: '#ffffff',
+        borderRadius: '12px',
+        fontFamily: "'Montserrat', sans-serif",
+        fontSize: '13px',
+        fontWeight: 700
+      }
+    });
+    return true;
   };
 
   const updateOrderStatus = (orderId, status, trackingId = '') => {
     const trackingSteps = ['Order Placed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered'];
     const statusIndexes = { 'Order Placed': 0, Pending: 0, Processing: 1, Shipped: 2, 'Out for Delivery': 3, Delivered: 4, Cancelled: -1 };
-    const updatedAt = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    setOrders((prev) => prev.map((order) => {
+    const now = new Date();
+    const updatedAt = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const updatedAtTime = now.toISOString();
+    if (!ordersRef.current.some((order) => order.id === orderId)) return false;
+    const nextOrders = ordersRef.current.map((order) => {
       if (order.id !== orderId) return order;
       const statusIndex = statusIndexes[status] ?? order.statusIndex ?? 0;
       return {
         ...order,
         status,
         trackingId: trackingId.trim() || order.trackingId || '',
-        statusUpdatedAt: updatedAt,
+        statusUpdatedAt: updatedAtTime,
         canCancel: status === 'Order Placed' || status === 'Pending',
         statusIndex,
         timeline: trackingSteps.map((step, index) => {
-          const wasCompleted = order.timeline?.find((entry) => entry.step === step)?.completed;
+          const previousEntry = order.timeline?.find((entry) => entry.step === step);
+          const wasCompleted = previousEntry?.completed;
           const completed = statusIndex >= index || (status === 'Cancelled' && wasCompleted);
           return {
             step,
-            date: completed ? (step === status ? updatedAt : order.timeline?.find((entry) => entry.step === step)?.date || order.date) : '',
-            desc: step === status ? `Order status updated to ${status}.` : order.timeline?.find((entry) => entry.step === step)?.desc || '',
+            date: completed ? (step === status ? updatedAt : previousEntry?.date || order.date) : '',
+            updatedAt: completed ? (step === status ? updatedAtTime : previousEntry?.updatedAt || '') : '',
+            desc: step === status ? `Order status updated to ${status}.` : previousEntry?.desc || '',
             completed
           };
         })
       };
-    }));
+    });
+    return commitOrders(nextOrders);
   };
 
+  const getOrderById = (orderId) => orders.find((order) => order.id === orderId) || null;
+
   const resetOrders = () => {
+    ordersRef.current = [];
     setOrders([]);
     try {
       localStorage.removeItem('protinut_orders');
@@ -182,6 +232,7 @@ export const OrderProvider = ({ children }) => {
         placeOrder,
         cancelOrder,
         updateOrderStatus,
+        getOrderById,
         resetOrders
       }}
     >
