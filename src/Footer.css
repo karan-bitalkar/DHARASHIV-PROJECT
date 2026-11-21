@@ -10,6 +10,12 @@
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .protinut-footer--mobile-hidden {
+    display: none;
+  }
+}
+
 /* Newsletter Strip */
 .footer-newsletter-wrap {
   background: linear-gradient(135deg, #ef5323 0%, #d84515 100%);

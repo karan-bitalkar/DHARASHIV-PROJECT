@@ -77,6 +77,12 @@
 }
 
 /* Main banner image — fills the fixed height uniformly */
+.slide-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .slide-img {
   display: block;
   max-width: 100%;
@@ -231,7 +237,17 @@
 
 @media (max-width: 768px) {
   .hero-carousel {
-    height: 240px;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+
+  .slide-backdrop {
+    display: none;
+  }
+
+  .slide-img {
+    object-fit: contain;
+    object-position: center;
   }
 
   .carousel-arrow {
@@ -248,11 +264,5 @@
     right: 10px;
     font-size: 11px;
     padding: 3px 9px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-carousel {
-    height: clamp(210px, 70vw, 280px);
   }
 }

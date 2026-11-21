@@ -3,6 +3,10 @@ import { useOrders } from './OrderContext';
 import { useAuth } from './AuthContext';
 
 const AdminStoreContext = createContext(null);
+const CLASSY_CRUNCH_STOCK_MIGRATION_KEY = 'protinut_classy_crunch_unavailable_v1';
+const POWER_DUO_STOCK_MIGRATION_KEY = 'protinut_power_duo_unavailable_v1';
+const LEGACY_CREAMY_PRODUCT_IMAGE = '/products/creamy-1kg.png';
+const ULTRA_CREAMY_PRODUCT_IMAGE = '/products/ultra-creamy-peanut-butter.png';
 
 const readStoredValue = (key, fallback) => {
   try {
@@ -26,14 +30,46 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
     const savedDeletedIds = readStoredValue('protinut_deleted_products', []);
     const deletedIds = new Set(Array.isArray(savedDeletedIds) ? savedDeletedIds : []);
     const savedProducts = readStoredValue('protinut_products', null);
+    const shouldMigrateClassyStock = readStoredValue(CLASSY_CRUNCH_STOCK_MIGRATION_KEY, false) !== true;
+    const shouldMigratePowerDuoStock = readStoredValue(POWER_DUO_STOCK_MIGRATION_KEY, false) !== true;
     const availableProducts = initialProducts.filter((product) => !deletedIds.has(product.id));
     if (!Array.isArray(savedProducts)) return availableProducts;
 
     const savedById = new Map(savedProducts.map((product) => [product.id, product]));
-    const merged = availableProducts.map((product) => ({
-      ...product,
-      ...(savedById.get(product.id) || {})
-    }));
+    const merged = availableProducts.map((product) => {
+      const savedProduct = savedById.get(product.id);
+      const mergedProduct = { ...product, ...(savedProduct || {}) };
+      const getCurrentProductImage = (image) => (
+        image === LEGACY_CREAMY_PRODUCT_IMAGE ? ULTRA_CREAMY_PRODUCT_IMAGE : image
+      );
+
+      if (product.id === 'creamy-1kg') {
+        return {
+          ...mergedProduct,
+          image: getCurrentProductImage(mergedProduct.image),
+          studioImage: getCurrentProductImage(mergedProduct.studioImage),
+          ...(Array.isArray(mergedProduct.images)
+            ? { images: mergedProduct.images.map(getCurrentProductImage) }
+            : {})
+        };
+      }
+
+      if (
+        (product.id === 'classy-crunch' && shouldMigrateClassyStock)
+        || (product.id === 'combo-power-duo' && shouldMigratePowerDuoStock)
+      ) {
+        return {
+          ...mergedProduct,
+          inStock: product.inStock,
+          isAvailable: product.isAvailable,
+          stock: product.stock,
+          stockStatus: product.stockStatus,
+          tag: product.tag
+        };
+      }
+
+      return mergedProduct;
+    });
     const knownIds = new Set(availableProducts.map((product) => product.id));
     return [...merged, ...savedProducts.filter((product) => !knownIds.has(product.id) && !deletedIds.has(product.id))];
   });
@@ -42,6 +78,8 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
   useEffect(() => {
     try {
       localStorage.setItem('protinut_products', JSON.stringify(products));
+      localStorage.setItem(CLASSY_CRUNCH_STOCK_MIGRATION_KEY, 'true');
+      localStorage.setItem(POWER_DUO_STOCK_MIGRATION_KEY, 'true');
     } catch (error) {
       console.error('Unable to save products to localStorage', error);
     }

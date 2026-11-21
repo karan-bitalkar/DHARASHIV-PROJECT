@@ -3,6 +3,11 @@ import './HeroCarousel.css';
 import { useGlobalSettings } from './GlobalSettingsContext';
 
 const AUTO_PLAY_INTERVAL = 3500; // ms (Flipkart uses ~3.5s)
+const MOBILE_SLIDE_SOURCES = {
+  '/hero-slides/slide-16.png': '/hero-slides-mobile/slide-16.png',
+  '/hero-slides/slide-28.png': '/hero-slides-mobile/slide-28.png',
+  '/hero-slides/slide-30.png': '/hero-slides-mobile/slide-30.png',
+};
 
 const HeroCarousel = () => {
   const { settings } = useGlobalSettings();
@@ -81,13 +86,21 @@ const HeroCarousel = () => {
             />
             {/* Sharp foreground banner */}
             <div className="slide-content-frame">
-              <img
-                src={slide.src}
-                alt={slide.alt}
-                className="slide-img"
-                loading={i === 0 ? 'eager' : 'lazy'}
-                draggable={false}
-              />
+              <picture className="slide-picture">
+                {MOBILE_SLIDE_SOURCES[slide.src] && (
+                  <source
+                    media="(max-width: 768px)"
+                    srcSet={MOBILE_SLIDE_SOURCES[slide.src]}
+                  />
+                )}
+                <img
+                  src={slide.src}
+                  alt={slide.alt}
+                  className="slide-img"
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  draggable={false}
+                />
+              </picture>
             </div>
           </div>
         ))}

@@ -18,6 +18,9 @@ import BottomNav from './BottomNav';
 import { initialWishlistProducts } from './wishlistData';
 import { allProductsData } from './OurRange';
 import { getCustomerIdentity, getCustomerOrders } from './orderOwnership';
+import ScrollToTop from './ScrollToTop';
+
+const HONEY_CRUNCH_IMAGE = '/products/range2/honey.png';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -60,6 +63,7 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isTrackingRoute = location.pathname.startsWith('/track-order/');
   const hideHeaderFooter = isAdminRoute || isTrackingRoute;
+  const hideFooterOnMobile = location.pathname === '/account' || location.pathname === '/wishlist';
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
@@ -130,7 +134,10 @@ function AppContent() {
   const [wishlistItems, setWishlistItems] = useState(() => {
     try {
       const saved = localStorage.getItem('protinut_wishlist');
-      return saved ? JSON.parse(saved) : [];
+      const items = saved ? JSON.parse(saved) : [];
+      return Array.isArray(items)
+        ? items.map((item) => item?.id === 'honey-crunch' ? { ...item, image: HONEY_CRUNCH_IMAGE } : item)
+        : items;
     } catch {
       return [];
     }
@@ -692,7 +699,7 @@ function AppContent() {
       </main>
 
       {/* Brand Footer — hidden on full-page auth & admin routes */}
-      {!hideHeaderFooter && <Footer />}
+      {!hideHeaderFooter && <Footer hideOnMobile={hideFooterOnMobile} />}
 
       {/* Slide-Over Right Side Cart Drawer */}
       {!hideHeaderFooter && (
@@ -752,6 +759,7 @@ function App() {
           <AdminStoreProvider initialProducts={allProductsData}>
             <CartProvider>
               <Router>
+                <ScrollToTop />
                 <AppContent />
               </Router>
             </CartProvider>

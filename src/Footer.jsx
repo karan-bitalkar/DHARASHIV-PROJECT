@@ -4,7 +4,7 @@ import './Footer.css';
 import logoImg from './assets/protinut-logo.png';
 import { useGlobalSettings } from './GlobalSettingsContext';
 
-const Footer = () => {
+const Footer = ({ hideOnMobile = false }) => {
   const { settings } = useGlobalSettings();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -18,7 +18,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="protinut-footer" id="contact-us">
+    <footer className={`protinut-footer${hideOnMobile ? ' protinut-footer--mobile-hidden' : ''}`} id="contact-us">
       {/* Top Newsletter Strip */}
       <div className="footer-newsletter-wrap">
         <div className="footer-newsletter-container">
