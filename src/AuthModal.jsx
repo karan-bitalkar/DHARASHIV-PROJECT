@@ -235,13 +235,13 @@ const AuthModal = ({
 
             {/* Product Jars Showcase (Side by Side with Glow) */}
             <div className="auth-jars-showcase">
-              <div className="auth-jar-card jar-classy">
+              <div className="auth-jar-card jar-dark-chocolate">
                 <img
-                  src="/products/classy-crunch.png"
-                  alt="PROTINUT Classy Crunch Peanut Butter"
+                  src="/products/dark-chocolate-crunch-front.png"
+                  alt="PROTINUT Peanut Butter Dark Chocolate Crunch"
                   className="auth-jar-image"
                 />
-                <span className="auth-jar-caption">Classy Crunch</span>
+                <span className="auth-jar-caption">Dark Chocolate Crunch</span>
               </div>
               <div className="auth-jar-card jar-choco">
                 <img

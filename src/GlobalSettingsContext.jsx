@@ -1,6 +1,18 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const STORAGE_KEY = 'protinut_global_settings';
+const RETIRED_PRODUCT_BANNER_SOURCES = new Set([
+  '/hero-slides/slide-28.png',
+  '/hero-slides/slide-30.png',
+  '/hero-slides-mobile/slide-28.png',
+  '/hero-slides-mobile/slide-30.png'
+]);
+
+const removeRetiredProductBanners = (banners) => (
+  Array.isArray(banners)
+    ? banners.filter((banner) => !RETIRED_PRODUCT_BANNER_SOURCES.has(banner?.src))
+    : []
+);
 
 export const defaultGlobalSettings = {
   companyName: 'PROTINUT FOODS',
@@ -14,9 +26,7 @@ export const defaultGlobalSettings = {
   homeHeroSubtitle: 'Small-batch roasted in Dharashiv, Maharashtra. Made with real peanuts and nothing unnecessary.',
   showHeroBanner: true,
   heroBanners: [
-    { id: 'hero-slide-16', src: '/hero-slides/slide-16.png', alt: 'Make Your Breakfast Healthy & Tasty - Fresh Bowl', active: true },
-    { id: 'hero-slide-28', src: '/hero-slides/slide-28.png', alt: 'Fuel Your Day, Power Your Way - Shop Now Both Jars', active: true },
-    { id: 'hero-slide-30', src: '/hero-slides/slide-30.png', alt: 'Real Peanuts. Real Nutrition. - Explore Products', active: true }
+    { id: 'hero-slide-16', src: '/hero-slides/slide-16.png', alt: 'Make Your Breakfast Healthy & Tasty - Fresh Bowl', active: true }
   ],
   // offerBannerText: 'Free pan-India delivery on every order',
   showOfferBanner: true,
@@ -42,7 +52,16 @@ const loadSettings = () => {
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       throw new Error('Stored global settings must be an object');
     }
-    return { ...defaultGlobalSettings, ...parsed };
+    const settings = { ...defaultGlobalSettings, ...parsed };
+    settings.heroBanners = removeRetiredProductBanners(settings.heroBanners);
+    if (JSON.stringify(settings.heroBanners) !== JSON.stringify(parsed.heroBanners)) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      } catch (error) {
+        console.error('Unable to remove retired product banners from saved settings', error);
+      }
+    }
+    return settings;
   } catch (error) {
     console.error('Unable to load website settings', error);
     return defaultGlobalSettings;
@@ -63,6 +82,9 @@ export const GlobalSettingsProvider = ({ children }) => {
 
   const updateSettings = useCallback((updates) => {
     const nextSettings = { ...settings, ...updates };
+    if (Array.isArray(nextSettings.heroBanners)) {
+      nextSettings.heroBanners = removeRetiredProductBanners(nextSettings.heroBanners);
+    }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSettings));
       setSettings(nextSettings);

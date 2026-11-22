@@ -55,7 +55,7 @@ const blogArticles = [
         },
         {
           heading: 'Timing Your Intake: Pre-Workout vs. Post-Workout',
-          body: '• Pre-Workout (60-90 mins before): Enjoy 1-2 tbsp of Protinut Classy Crunch on whole wheat sourdough or with a banana. The combination of complex carbs and healthy fats provides steady, sustained energy release without an insulin crash.\n• Post-Workout (within 45 mins): Blend 2 tbsp of Protinut into a high-protein shake with chilled almond milk and oats. The dense micronutrients and healthy fats replenish glycogen and support cellular recovery.'
+          body: '• Pre-Workout (60-90 mins before): Enjoy 1-2 tbsp of PROTINUT Peanut Butter on whole wheat sourdough or with a banana. The combination of complex carbs and healthy fats provides steady, sustained energy release without an insulin crash.\n• Post-Workout (within 45 mins): Blend 2 tbsp of PROTINUT Peanut Butter into a high-protein shake with chilled almond milk and oats. The dense micronutrients and healthy fats replenish glycogen and support cellular recovery.'
         },
         {
           heading: 'The Complete Protein Synergy: Combining with Grains',
@@ -121,7 +121,7 @@ const blogArticles = [
         },
         {
           heading: 'Eliminating the "4 PM Snack Attack"',
-          body: 'Most diets fail not at breakfast or dinner, but during the afternoon slump between 3:30 PM and 5:00 PM when willpower drops. Eating 1 tablespoon of Protinut Classy Crunch with an apple or spooned straight from the jar completely stabilizes blood sugar and stops you from raiding the office biscuit tin.'
+          body: 'Most diets fail not at breakfast or dinner, but during the afternoon slump between 3:30 PM and 5:00 PM when willpower drops. Eating 1 tablespoon of PROTINUT Peanut Butter with an apple or spooned straight from the jar can make a satisfying snack.'
         },
         {
           heading: 'The Golden Rule: Portion Control and Measurement',

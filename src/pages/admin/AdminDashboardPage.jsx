@@ -177,26 +177,26 @@ const AdminDashboardPage = () => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const name = String(formData.get('name') || '').trim();
-    const mrp550 = Number(formData.get('mrp550'));
-    const discountPercent550 = Number(formData.get('discount550'));
+    const has550gmPrice = !editingProduct || editingProduct.price550 != null;
+    const mrp550 = has550gmPrice ? Number(formData.get('mrp550')) : null;
+    const discountPercent550 = has550gmPrice ? Number(formData.get('discount550')) : null;
     const mrp1kg = Number(formData.get('mrp1kg'));
     const discountPercent1kg = Number(formData.get('discount1kg'));
     const stockStatus = String(formData.get('stockStatus') || 'Out of Stock');
-    const price550 = Math.round(mrp550 * (1 - discountPercent550 / 100));
+    const price550 = has550gmPrice ? Math.round(mrp550 * (1 - discountPercent550 / 100)) : null;
     const price1kg = Math.round(mrp1kg * (1 - discountPercent1kg / 100));
     const stock = Number(formData.get('stock'));
-    const image = String(formData.get('image') || '').trim() || '/products/classy-crunch.png';
+    const image = String(formData.get('image') || '').trim() || '/products/dark-chocolate-crunch-front.png';
 
     if (
       !name
-      || !Number.isFinite(mrp550)
+      || (has550gmPrice && !Number.isFinite(mrp550))
       || !Number.isFinite(mrp1kg)
-      || !Number.isFinite(discountPercent550)
+      || (has550gmPrice && !Number.isFinite(discountPercent550))
       || !Number.isFinite(discountPercent1kg)
-      || mrp550 <= 0
+      || (has550gmPrice && mrp550 <= 0)
       || mrp1kg <= 0
-      || discountPercent550 < 0
-      || discountPercent550 > 100
+      || (has550gmPrice && (discountPercent550 < 0 || discountPercent550 > 100))
       || discountPercent1kg < 0
       || discountPercent1kg > 100
       || !Number.isInteger(stock)
@@ -216,7 +216,7 @@ const AdminDashboardPage = () => {
         price1kg,
         originalPrice550: mrp550,
         originalPrice1kg: mrp1kg,
-        discountPercent550,
+        ...(has550gmPrice ? { discountPercent550 } : {}),
         discountPercent1kg,
         stock,
         stockStatus,
@@ -880,7 +880,7 @@ const TopProducts = ({ orders, products }) => {
     <ul className="admin-list">
       {topProducts.map((product) => (
         <li className="admin-list-item" key={product.id}>
-          <img className="admin-product-thumb" src={product.image || '/products/classy-crunch.png'} alt="" />
+          <img className="admin-product-thumb" src={product.image || '/products/dark-chocolate-crunch-front.png'} alt="" />
           <span><strong>{product.name}</strong><small>{quantities.get(product.id) || 0} sold</small></span>
         </li>
       ))}
@@ -897,7 +897,7 @@ const RecentReviews = ({ products }) => {
     <ul className="admin-reviews-list">
       {reviews.map((review) => (
         <li key={review.id}>
-          <img src={review.image || '/products/classy-crunch.png'} alt="" />
+          <img src={review.image || '/products/dark-chocolate-crunch-front.png'} alt="" />
           <span><strong>{review.userName}</strong><small>{review.productName}</small><span className="admin-review-stars">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span><p>{review.title}</p></span>
         </li>
       ))}
@@ -911,7 +911,7 @@ const LowStockTable = ({ products }) => products.length ? (
       <thead><tr><th>Product</th><th>Stock</th><th>Status</th></tr></thead>
       <tbody>{products.map((product) => (
         <tr key={product.id}>
-          <td><span className="admin-product-cell"><img src={product.image || '/products/classy-crunch.png'} alt="" />{product.name}</span></td>
+          <td><span className="admin-product-cell"><img src={product.image || '/products/dark-chocolate-crunch-front.png'} alt="" />{product.name}</span></td>
           <td>{stockFor(product)}</td>
           <td><span className="admin-low-stock-pill">{stockFor(product) === 0 ? 'Out of stock' : 'Low stock'}</span></td>
         </tr>
@@ -927,22 +927,26 @@ const ProductsTable = ({ products, onEdit, onDelete }) => {
     <>
       <div className="admin-table-scroll">
         <table className="admin-table admin-products-table admin-responsive-cards">
-          <thead><tr><th>Product</th><th>SKU</th><th>MRP (550gm)</th><th>Discount (550gm)</th><th>Final Price (550gm)</th><th>MRP (1kg)</th><th>Discount (1kg)</th><th>Final Price (1kg)</th><th>Stock</th><th>Stock Status</th><th>Actions</th></tr></thead>
-          <tbody>{pagination.visibleItems.map((product) => (
-            <tr key={product.id}>
-              <td data-label="Product"><span className="admin-product-cell"><img src={product.image || '/products/classy-crunch.png'} alt="" /><strong>{product.name}</strong></span></td>
-              <td data-label="SKU">{product.sku || `PRO-${product.id.slice(0, 6).toUpperCase()}`}</td>
-              <td data-label="MRP (550gm)">{currency(product.originalPrice550 || product.price550)}</td>
-              <td data-label="Discount (550gm)">{product.discountPercent550 ?? getDiscountPercent(product.originalPrice550 || product.price550, product.price550)}%</td>
-              <td data-label="Final price (550gm)"><strong>{currency(product.price550)}</strong></td>
-              <td data-label="MRP (1kg)">{currency(product.originalPrice1kg || product.price1kg)}</td>
-              <td data-label="Discount (1kg)">{product.discountPercent1kg ?? getDiscountPercent(product.originalPrice1kg || product.price1kg, product.price1kg)}%</td>
-              <td data-label="Final price (1kg)"><strong>{currency(product.price1kg)}</strong></td>
-              <td data-label="Stock"><span className={stockFor(product) <= 5 ? 'admin-low-stock-pill' : 'admin-stock-pill'}>{stockFor(product)}</span></td>
-              <td data-label="Stock status">{getProductStockStatus(product)}</td>
-              <td data-label="Actions"><div className="admin-action-row"><button type="button" className="admin-button secondary" onClick={() => onEdit(product)}>Edit</button><button type="button" className="admin-button danger" onClick={() => onDelete(product)}>Delete</button></div></td>
-            </tr>
-          ))}</tbody>
+          <thead><tr><th>Product</th><th>SKU</th><th>MRP (Pack 1)</th><th>Discount (Pack 1)</th><th>Final Price (Pack 1)</th><th>MRP (Pack 2)</th><th>Discount (Pack 2)</th><th>Final Price (Pack 2)</th><th>Stock</th><th>Stock Status</th><th>Actions</th></tr></thead>
+          <tbody>{pagination.visibleItems.map((product) => {
+            const firstPackSize = product.id === 'dark-chocolate-crunch' ? '500 Gram' : '550gm';
+            const secondPackSize = product.id === 'dark-chocolate-crunch' ? '1000 Gram (1 KG)' : '1kg';
+            return (
+              <tr key={product.id}>
+                <td data-label="Product"><span className="admin-product-cell"><img src={product.image || '/products/dark-chocolate-crunch-front.png'} alt="" /><strong>{product.name}</strong></span></td>
+                <td data-label="SKU">{product.sku || `PRO-${product.id.slice(0, 6).toUpperCase()}`}</td>
+                <td data-label={`MRP (${firstPackSize})`}>{product.price550 == null ? '—' : currency(product.originalPrice550 || product.price550)}</td>
+                <td data-label={`Discount (${firstPackSize})`}>{product.price550 == null ? '—' : `${product.discountPercent550 ?? getDiscountPercent(product.originalPrice550 || product.price550, product.price550)}%`}</td>
+                <td data-label={`Final price (${firstPackSize})`}><strong>{product.price550 == null ? '—' : currency(product.price550)}</strong></td>
+                <td data-label={`MRP (${secondPackSize})`}>{currency(product.originalPrice1kg || product.price1kg)}</td>
+                <td data-label={`Discount (${secondPackSize})`}>{product.discountPercent1kg ?? getDiscountPercent(product.originalPrice1kg || product.price1kg, product.price1kg)}%</td>
+                <td data-label={`Final price (${secondPackSize})`}><strong>{currency(product.price1kg)}</strong></td>
+                <td data-label="Stock"><span className={stockFor(product) <= 5 ? 'admin-low-stock-pill' : 'admin-stock-pill'}>{stockFor(product)}</span></td>
+                <td data-label="Stock status">{getProductStockStatus(product)}</td>
+                <td data-label="Actions"><div className="admin-action-row"><button type="button" className="admin-button secondary" onClick={() => onEdit(product)}>Edit</button><button type="button" className="admin-button danger" onClick={() => onDelete(product)}>Delete</button></div></td>
+              </tr>
+            );
+          })}</tbody>
         </table>
       </div>
       <PaginationControls pagination={pagination} />
@@ -1188,15 +1192,27 @@ const InventoryTable = ({ products, onEdit }) => {
       <div className="admin-table-scroll">
         <table className="admin-table">
           <thead><tr><th>Product</th><th>SKU</th><th>Available stock</th><th>Inventory status</th><th>Action</th></tr></thead>
-          <tbody>{pagination.visibleItems.map((product) => (
-            <tr key={product.id}>
-              <td><span className="admin-product-cell"><img src={product.image || '/products/classy-crunch.png'} alt="" /><strong>{product.name}</strong></span></td>
-              <td>{product.sku || `PRO-${product.id.slice(0, 6).toUpperCase()}`}</td>
-              <td>{stockFor(product)}</td>
-              <td><span className={stockFor(product) <= 5 ? 'admin-low-stock-pill' : 'admin-stock-pill'}>{stockFor(product) === 0 ? 'Out of stock' : stockFor(product) <= 5 ? 'Low stock' : 'In stock'}</span></td>
-              <td><button type="button" className="admin-button secondary" onClick={() => onEdit(product)}>Adjust stock</button></td>
-            </tr>
-          ))}</tbody>
+          <tbody>{pagination.visibleItems.map((product) => {
+            const inventoryStatus = product.id === 'dark-chocolate-crunch'
+              ? getProductStockStatus(product)
+              : stockFor(product) === 0
+                ? 'Out of stock'
+                : stockFor(product) <= 5
+                  ? 'Low stock'
+                  : 'In stock';
+            const isLowStock = product.id === 'dark-chocolate-crunch'
+              ? ['Out of Stock', 'Currently Unavailable', 'Low Stock'].includes(inventoryStatus)
+              : stockFor(product) <= 5;
+            return (
+              <tr key={product.id}>
+                <td><span className="admin-product-cell"><img src={product.image || '/products/dark-chocolate-crunch-front.png'} alt="" /><strong>{product.name}</strong></span></td>
+                <td>{product.sku || `PRO-${product.id.slice(0, 6).toUpperCase()}`}</td>
+                <td>{stockFor(product)}</td>
+                <td><span className={isLowStock ? 'admin-low-stock-pill' : 'admin-stock-pill'}>{inventoryStatus}</span></td>
+                <td><button type="button" className="admin-button secondary" onClick={() => onEdit(product)}>Adjust stock</button></td>
+              </tr>
+            );
+          })}</tbody>
         </table>
       </div>
       <PaginationControls pagination={pagination} />
@@ -1235,7 +1251,7 @@ const getReviews = (products) => {
   return Object.values(initialReviewsByProduct).flatMap((product) => product.reviews.map((review) => ({
     ...review,
     productName: product.productName,
-    image: productById.get(product.productId)?.image || '/products/classy-crunch.png'
+    image: productById.get(product.productId)?.image || '/products/dark-chocolate-crunch-front.png'
   })));
 };
 
@@ -1467,12 +1483,13 @@ const NotificationSettings = ({ enabled, onToggle }) => (
 );
 
 const ProductPricingFields = ({ product, size, mrpField, discountField, finalPriceField }) => {
-  const mrp = Number(product?.[size === '550gm' ? 'originalPrice550' : 'originalPrice1kg']
-    ?? product?.[size === '550gm' ? 'price550' : 'price1kg']
+  const isOneKilogram = size === '1kg';
+  const mrp = Number(product?.[isOneKilogram ? 'originalPrice1kg' : 'originalPrice550']
+    ?? product?.[isOneKilogram ? 'price1kg' : 'price550']
     ?? '');
-  const finalPrice = Number(product?.[size === '550gm' ? 'price550' : 'price1kg'] ?? '');
+  const finalPrice = Number(product?.[isOneKilogram ? 'price1kg' : 'price550'] ?? '');
   const discount = product
-    ? (product[size === '550gm' ? 'discountPercent550' : 'discountPercent1kg']
+    ? (product[isOneKilogram ? 'discountPercent1kg' : 'discountPercent550']
       ?? getDiscountPercent(mrp, finalPrice))
     : 0;
 
@@ -1504,7 +1521,7 @@ const ProductForm = ({ product, onClose, onSubmit }) => (
         <label className="admin-form-wide">Product name<input name="name" defaultValue={product?.name || ''} required maxLength="100" placeholder="Product name" /></label>
         {!product && <label>Category<select name="category"><option value="other">Other</option><option value="crunchy">Crunchy</option><option value="creamy">Creamy</option><option value="sweet">Sweet</option><option value="combos">Combos</option></select></label>}
         <label>SKU<input name="sku" defaultValue={product?.sku || ''} maxLength="40" placeholder="PRO-000001" /></label>
-        <ProductPricingFields product={product} size="550gm" mrpField="mrp550" discountField="discount550" finalPriceField="price550" />
+        {(!product || product.price550 != null) && <ProductPricingFields product={product} size={product?.id === 'dark-chocolate-crunch' ? '500 Gram' : '550gm'} mrpField="mrp550" discountField="discount550" finalPriceField="price550" />}
         <ProductPricingFields product={product} size="1kg" mrpField="mrp1kg" discountField="discount1kg" finalPriceField="price1kg" />
         <label>Stock status
           <select name="stockStatus" defaultValue={product ? getProductStockStatus(product) : 'Out of Stock'} required>

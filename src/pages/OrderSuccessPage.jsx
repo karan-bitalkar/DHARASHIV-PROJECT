@@ -180,9 +180,13 @@ const OrderSuccessPage = () => {
                 <div key={idx} className="p-4 sm:p-5 flex items-center gap-4 hover:bg-gray-50/50 transition">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#faf3e8] rounded-xl p-2 flex items-center justify-center border border-amber-100 flex-shrink-0">
                     <img
-                      src={item.image || '/products/classy-crunch.png'}
+                      src={item.image || '/products/dark-chocolate-crunch-front.png'}
                       alt={item.name}
                       className="max-h-full max-w-full object-contain"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = '/products/dark-chocolate-crunch-front.png';
+                      }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">

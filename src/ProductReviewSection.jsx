@@ -5,7 +5,7 @@ import { initialReviewsByProduct } from './reviewsData';
 import toast from 'react-hot-toast';
 import './ProductReviewSection.css';
 
-const ProductReviewSection = ({ productId = 'classy-crunch', productName = 'Peanut Butter Classy Crunch' }) => {
+const ProductReviewSection = ({ productId = 'dark-chocolate-crunch', productName = 'PROTINUT Peanut Butter Dark Chocolate Crunch' }) => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

@@ -6,35 +6,94 @@ import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProdu
 import './OurRange.css';
 
 export const allProductsData = [
-  // ── 1. The 2 Main Signature Products (In Stock & Available) ──
+  // ── 1. The Main Signature Products ──
   {
-    id: 'classy-crunch',
-    name: 'Peanut Butter Classy Crunch',
+    id: 'dark-chocolate-crunch',
+    name: 'PROTINUT Peanut Butter Dark Chocolate Crunch',
     category: 'crunchy',
     isCombo: false,
-    inStock: false,
-    isAvailable: false,
-    stock: 0,
-    stockStatus: 'Currently Unavailable',
-    price550: 250,
-    price1kg: 449,
-    originalPrice550: 340,
-    originalPrice1kg: 599,
-    defaultWeight: '550gm',
+    inStock: true,
+    isAvailable: true,
+    stock: 1,
+    stockStatus: 'In Stock',
+    price550: 389,
+    price1kg: 589,
+    originalPrice550: 389,
+    originalPrice1kg: 589,
+    discountPercent550: 0,
+    discountPercent1kg: 0,
+    defaultWeight: '500gm',
     weightOptions: [
-      { id: '550gm', label: '550gm', price: 250, original: 340 },
-      { id: '1kg', label: '1kg (Mega Value)', price: 449, original: 599 }
+      { id: '500gm', label: '500 Gram', price: 389, original: 389 },
+      { id: '1kg', label: '1000 Gram (1 KG)', price: 589, original: 589 }
     ],
-    rating: 4.9,
-    reviewsCount: 340,
-    proteinNumber: 30,
-    image: '/products/classy-crunch.png',
-    studioImage: '/products/classy-crunch-studio.jpg',
-    tag: '★ Bestseller',
-    themeColor: '#ef5323',
-    protein: '30g Protein',
-    highlightBadge: 'Signature Roast',
-    description: '100% slow-roasted Maharashtra peanuts with our signature hearty crunch. Zero palm oil, zero trans fat, high plant protein.'
+    weight: '500gm',
+    rating: 0,
+    reviewsCount: 0,
+    proteinNumber: 26,
+    image: '/products/dark-chocolate-crunch-front.png',
+    studioImage: '/products/dark-chocolate-crunch-front.png',
+    images: [
+      '/products/dark-chocolate-crunch-front.png',
+      '/products/dark-chocolate-crunch-nutrition.png',
+      '/products/dark-chocolate-crunch-benefits.png',
+      '/products/dark-chocolate-crunch-manufacturer.png',
+      '/products/dark-chocolate-crunch-lid.png'
+    ],
+    nutritionImage: '/products/dark-chocolate-crunch-nutrition.png',
+    benefitsImage: '/products/dark-chocolate-crunch-benefits.png',
+    manufacturerImage: '/products/dark-chocolate-crunch-manufacturer.png',
+    tag: 'Dark Chocolate Crunch',
+    themeColor: '#9c1c4e',
+    protein: '8.32g Protein per 32g serving',
+    highlightBadge: 'No Hydrogenated Oil',
+    description: 'Crunchy peanut butter made with roasted peanuts (79%) and chocolate ingredients.',
+    ingredients: 'Roasted Peanut (79%), Chocolate (Natural Cocoa Powder, Cocoa Butter, Sugar), Emulsifier E-471 (100% Plant Based), Himalayan Pink Salt, Added Natural Identical Flavour (Chocolate). Contains peanuts.',
+    nutritionalInformation: [
+      { label: 'Serving size', value: '32 g' },
+      { label: 'Energy', value: '589.00 kcal per 100 g; 188.48 kcal per serving; 9.42% RDA per serving' },
+      { label: 'Protein', value: '26.00 g per 100 g; 8.32 g per serving' },
+      { label: 'Carbohydrate', value: '26.00 g per 100 g; 8.32 g per serving' },
+      { label: 'Dietary fiber', value: '7.00 g per 100 g; 2.24 g per serving' },
+      { label: 'Total sugars', value: '11.00 g per 100 g; 3.52 g per serving; 7.04% RDA per serving' },
+      { label: 'Added sugars', value: '8.00 g per 100 g; 2.56 g per serving; 5.12% RDA per serving' },
+      { label: 'Total fat', value: '41.00 g per 100 g; 13.12 g per serving; 19.58% RDA per serving' },
+      { label: 'Trans fat', value: '0.00 g per 100 g; 0.00 g per serving; 0.00% RDA per serving' },
+      { label: 'Saturated fat', value: '8.00 g per 100 g; 2.56 g per serving; 11.64% RDA per serving' },
+      { label: 'Polyunsaturated fat', value: '14.00 g per 100 g; 4.48 g per serving' },
+      { label: 'Monounsaturated fat', value: '19.00 g per 100 g; 6.08 g per serving' },
+      { label: 'Sodium', value: '187.00 mg per 100 g; 59.84 mg per serving; 2.99% RDA per serving' },
+      { label: 'Cholesterol', value: '0.00 mg per 100 g; 0.00 mg per serving' }
+    ],
+    benefits: [
+      'Energy booster',
+      'High protein',
+      'Healthy fats',
+      'Antioxidant',
+      'Vitamins and minerals',
+      '0% cholesterol and trans fat',
+      'Boost athletic performance'
+    ],
+    features: [
+      'No trans fat',
+      'No hydrogenated oil',
+      'No artificial ingredients'
+    ],
+    usageInstructions: [
+      'Use as a dip.',
+      'Add to smoothies.',
+      'Spread on bread or crackers.'
+    ],
+    storageInstructions: [
+      'Store the jar upside down to avoid oil separation.',
+      'Oil separation is a natural process. Just stir it well before use.'
+    ],
+    manufacturerDetails: [
+      { label: 'Marketed for', value: 'PROTINUT FOODS, Vidya Nagar, Dharashiv Taluka, Dharashiv, Maharashtra - 413501' },
+      { label: 'Manufactured and marketed by', value: 'CREAMSON FOODS, SR No. 122P3/P1, Plot No. 1 & 2, Near Green City, Gundala, Gondal, Gujarat - 360311' },
+      { label: 'FSSAI licence no.', value: '10021021000588' },
+      { label: 'Available pack sizes', value: '500 g and 1 kg' }
+    ]
   },
   {
     id: 'choco-crunch',
@@ -65,7 +124,7 @@ export const allProductsData = [
   },
   {
     id: 'combo-power-duo',
-    name: 'The Power Duo: Classy + Choco Crunch',
+    name: 'The Power Duo: Dark Chocolate Crunch + Choco Crunch',
     category: 'combos',
     isCombo: true,
     inStock: false,
@@ -84,13 +143,13 @@ export const allProductsData = [
     rating: 5.0,
     reviewsCount: 148,
     proteinNumber: 30,
-    image: '/products/classy-crunch.png',
+    image: '/products/dark-chocolate-crunch-front.png',
     studioImage: '/products/choco-crunch.png',
     tag: '🔥 Twin Pack Combo',
     themeColor: '#ef5323',
     protein: '30g & 26g Protein',
     highlightBadge: 'Save ₹226 Today',
-    description: 'Get both our main jars together! 1x Classy Crunch + 1x Choco Crunch. The ultimate combo for hearty morning toast and sweet cravings.'
+    description: 'Get both chocolate peanut butter jars together: 1x Dark Chocolate Crunch + 1x Choco Crunch.'
   },
 
   // ── 2. Other Products (Currently Unavailable / Upcoming Batches) ──
@@ -222,22 +281,30 @@ export const allProductsData = [
     reviewsCount: 94,
     proteinNumber: 32,
     image: '/products/high-protein-1kg.png',
-    studioImage: '/products/classy-crunch.png',
+    studioImage: '/products/dark-chocolate-crunch-front.png',
     tag: '🔴 Currently Unavailable',
     themeColor: '#1e3a8a',
     protein: 'Up to 32g Protein',
     highlightBadge: 'Awaiting Batch',
-    description: 'Complete 3-jar gym macro pack: 1x High-Protein Fitness + 1x Classy Crunch + 1x Choco Crunch.'
+    description: 'Complete 3-jar gym pack: 1x High-Protein Fitness + 1x Dark Chocolate Crunch + 1x Choco Crunch.'
   }
 ];
 
 const categoryTabs = [
   { id: 'all', label: 'All Products (8)', icon: '🔥' },
-  { id: 'in-stock', label: 'Available Now (Classy & Choco)', icon: '✅' },
+  { id: 'in-stock', label: 'Available Now', icon: '✅' },
   { id: 'combos', label: 'Twin Pack Duo', icon: '🎁' },
   { id: 'crunchy', label: 'Crunchy Jars', icon: '🥜' },
   { id: 'sweet', label: 'Choco Delight', icon: '🍫' }
 ];
+
+const getStartingPrice = (product) => {
+  const prices = (product.weightOptions || [])
+    .map((option) => Number(option.price))
+    .filter((price) => Number.isFinite(price));
+  if (prices.length > 0) return Math.min(...prices);
+  return Number(product.price550 ?? product.price1kg ?? 0);
+};
 
 const OurRange = ({
   onAddToCart,
@@ -251,7 +318,7 @@ const OurRange = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [selectedWeights, setSelectedWeights] = useState({
-    'classy-crunch': '550gm',
+    'dark-chocolate-crunch': '500gm',
     'choco-crunch': '550gm',
     'creamy-1kg': '1kg',
     'high-protein-1kg': '1kg',
@@ -346,9 +413,9 @@ const OurRange = ({
 
   // Sorting
   if (sortBy === 'price-asc') {
-    displayedList = [...displayedList].sort((a, b) => a.price550 - b.price550);
+    displayedList = [...displayedList].sort((a, b) => getStartingPrice(a) - getStartingPrice(b));
   } else if (sortBy === 'price-desc') {
-    displayedList = [...displayedList].sort((a, b) => b.price550 - a.price550);
+    displayedList = [...displayedList].sort((a, b) => getStartingPrice(b) - getStartingPrice(a));
   } else if (sortBy === 'rating') {
     displayedList = [...displayedList].sort((a, b) => b.rating - a.rating);
   } else if (sortBy === 'protein') {
@@ -402,7 +469,7 @@ const OurRange = ({
           </h2>
 
           <p className="range-sub-text">
-            Stone-ground from handpicked Maharashtra peanuts. Our two flagship signature jars — <strong>Classy Crunch</strong> and <strong>Choco Crunch</strong> — are freshly roasted and in stock for immediate pan-India dispatch.
+            Explore our peanut butter range, including the Dark Chocolate Crunch jar. Check each product for its ingredients, nutrition, price, and availability.
           </p>
 
           {/* Interactive Category Filter Pills */}
@@ -482,7 +549,7 @@ const OurRange = ({
               const matchedWeight = item.weightOptions.find((w) => w.id === activeWeightId) || item.weightOptions[0];
               const displayPrice = matchedWeight.price;
               const originalPrice = matchedWeight.original;
-              const discountPercent = Math.round(((originalPrice - displayPrice) / originalPrice) * 100);
+              const discountPercent = originalPrice ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) : 0;
               const isWishlisted = wishlistItems.some((w) => w.id === item.id);
 
               return (
@@ -577,7 +644,7 @@ const OurRange = ({
                       className="product-jar-image"
                       loading="lazy"
                       onError={(e) => {
-                        e.target.src = item.studioImage || '/products/classy-crunch.png';
+                        e.target.src = item.studioImage || '/products/dark-chocolate-crunch-front.png';
                       }}
                     />
                     <span className="card-hover-hint">Quick View 👁️</span>
@@ -587,11 +654,17 @@ const OurRange = ({
                   <div className="card-info-content">
                     
                     {/* Rating Stars & Count */}
-                    <div className="card-rating-strip">
-                      <span className="rating-stars">★★★★★</span>
-                      <strong className="rating-score">{item.rating}</strong>
-                      <span className="rating-reviews">({item.reviewsCount} verified reviews)</span>
-                    </div>
+                    {(Number(item.rating) > 0 || Number(item.reviewsCount) > 0) && (
+                      <div className="card-rating-strip">
+                        {Number(item.rating) > 0 && (
+                          <>
+                            <span className="rating-stars">★★★★★</span>
+                            <strong className="rating-score">{item.rating}</strong>
+                          </>
+                        )}
+                        {Number(item.reviewsCount) > 0 && <span className="rating-reviews">({item.reviewsCount} verified reviews)</span>}
+                      </div>
+                    )}
 
                     {/* Title */}
                     <h3 className="card-product-title">
@@ -602,7 +675,9 @@ const OurRange = ({
                     {/* Micro Nutrition Badges */}
                     <div className="card-micro-badges">
                       <span className="micro-badge protein">⚡ {item.protein}</span>
-                      <span className="micro-badge pure">🚫 0% Palm Oil</span>
+                      <span className="micro-badge pure">
+                        🚫 {item.id === 'dark-chocolate-crunch' ? '0% Trans Fat' : '0% Palm Oil'}
+                      </span>
                       <span className="micro-badge clean">✓ {item.highlightBadge}</span>
                     </div>
 
@@ -625,8 +700,8 @@ const OurRange = ({
                     <div className="card-pricing-row">
                       <div className="pricing-left">
                         <span className="final-price">₹{displayPrice}</span>
-                        <span className="mrp-strike">₹{originalPrice}</span>
-                        <span className="discount-tag">{discountPercent}% OFF</span>
+                        {originalPrice > displayPrice && <span className="mrp-strike">₹{originalPrice}</span>}
+                        {discountPercent > 0 && <span className="discount-tag">{discountPercent}% OFF</span>}
                       </div>
                       
                       <span className={`product-stock-status status-${getStockStatusClass(stockStatus)}`}>

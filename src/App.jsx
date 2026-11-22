@@ -17,6 +17,7 @@ import InvoiceModal from './InvoiceModal';
 import BottomNav from './BottomNav';
 import { initialWishlistProducts } from './wishlistData';
 import { allProductsData } from './OurRange';
+import { getProductPricing } from './productPricing';
 import { getCustomerIdentity, getCustomerOrders } from './orderOwnership';
 import ScrollToTop from './ScrollToTop';
 
@@ -74,7 +75,21 @@ function AppContent() {
   const [pendingAction, setPendingAction] = useState(() => {
     try {
       const saved = sessionStorage.getItem('protinut_pending_action');
-      return saved ? JSON.parse(saved) : null;
+      const action = saved ? JSON.parse(saved) : null;
+      const replacementProduct = products.find((product) => product.id === 'dark-chocolate-crunch');
+      if (!['classy-crunch', 'classy-crunch-1kg'].includes(action?.product?.id) || !replacementProduct) return action;
+      return {
+        ...action,
+        product: {
+          ...action.product,
+          id: replacementProduct.id,
+          name: replacementProduct.name,
+          selectedWeight: '1kg',
+          finalPrice: replacementProduct.price1kg,
+          originalPrice: replacementProduct.originalPrice1kg,
+          image: replacementProduct.image
+        }
+      };
     } catch {
       return null;
     }
@@ -135,9 +150,41 @@ function AppContent() {
     try {
       const saved = localStorage.getItem('protinut_wishlist');
       const items = saved ? JSON.parse(saved) : [];
-      return Array.isArray(items)
-        ? items.map((item) => item?.id === 'honey-crunch' ? { ...item, image: HONEY_CRUNCH_IMAGE } : item)
-        : items;
+      if (!Array.isArray(items)) return [];
+      const replacementProduct = allProductsData.find((product) => product.id === 'dark-chocolate-crunch');
+      const migratedItems = items.map((item) => {
+        if (!replacementProduct) return item;
+        if (['classy-crunch', 'classy-crunch-1kg'].includes(item?.id)) {
+          const pricing = getProductPricing(replacementProduct, '1kg');
+          return {
+            ...item,
+            id: replacementProduct.id,
+            name: replacementProduct.name,
+            weight: '1kg',
+            price: pricing.finalPrice,
+            originalPrice: pricing.mrp,
+            image: replacementProduct.image,
+            stockStatus: getProductStockStatus(replacementProduct),
+            inStock: isProductPurchasable(replacementProduct),
+            isAvailable: isProductPurchasable(replacementProduct)
+          };
+        }
+        if (item?.id === 'honey-crunch') return { ...item, image: HONEY_CRUNCH_IMAGE };
+        if (item?.id !== replacementProduct.id) return item;
+        const weight = item.weight || item.selectedWeight || replacementProduct.defaultWeight;
+        const pricing = getProductPricing(replacementProduct, weight);
+        return {
+          ...item,
+          name: replacementProduct.name,
+          price: pricing.finalPrice,
+          originalPrice: pricing.mrp,
+          image: replacementProduct.image,
+          stockStatus: getProductStockStatus(replacementProduct),
+          inStock: isProductPurchasable(replacementProduct),
+          isAvailable: isProductPurchasable(replacementProduct)
+        };
+      });
+      return [...new Map(migratedItems.map((item) => [item?.id, item])).values()];
     } catch {
       return [];
     }
@@ -161,9 +208,23 @@ function AppContent() {
 
         const stockStatus = getProductStockStatus(product);
         const inStock = isProductPurchasable(product);
-        if (item.stockStatus === stockStatus && item.inStock === inStock) return item;
+        const pricing = product.id === 'dark-chocolate-crunch'
+          ? getProductPricing(product, item.weight || item.selectedWeight || product.defaultWeight)
+          : null;
+        if (
+          item.stockStatus === stockStatus
+          && item.inStock === inStock
+          && (!pricing || (item.price === pricing.finalPrice && item.originalPrice === pricing.mrp))
+        ) return item;
         changed = true;
-        return { ...item, stockStatus, inStock, isAvailable: inStock, isOutOfStock: !inStock };
+        return {
+          ...item,
+          ...(pricing ? { name: product.name, price: pricing.finalPrice, originalPrice: pricing.mrp } : {}),
+          stockStatus,
+          inStock,
+          isAvailable: inStock,
+          isOutOfStock: !inStock
+        };
       });
       return changed ? updatedItems : currentItems;
     });
@@ -214,7 +275,7 @@ function AppContent() {
           weight: product.weight || product.selectedWeight || '550gm',
           price: product.price || product.finalPrice || 250,
           originalPrice: product.originalPrice || Math.round((product.price || 250) * 1.35),
-          image: product.image || '/products/classy-crunch.png',
+          image: product.image || '/products/dark-chocolate-crunch-front.png',
           rating: product.rating || 4.8,
           reviewsCount: product.reviewsCount || 280,
           tag: product.tag || 'Bestseller',

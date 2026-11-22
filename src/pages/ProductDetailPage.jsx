@@ -126,6 +126,8 @@ const ProductDetailPage = ({
   const productBenefits = product.benefits;
   const features = product.features;
   const ingredients = product.ingredients;
+  const usageInstructions = product.usageInstructions;
+  const manufacturerDetails = product.manufacturerDetails;
   const storageInstructions = product.storageInstructions || settings.storageInstructions;
 
   const handleAddToCart = (item = product, variant = selectedVariant, qty = quantity) => {
@@ -372,9 +374,47 @@ const ProductDetailPage = ({
         <div className="detail-information-sections">
           {product.description && <section className="detail-information-panel"><h2>Product Description</h2>{renderInformation(product.description)}</section>}
           {ingredients && <section className="detail-information-panel"><h2>Ingredients</h2>{renderInformation(ingredients)}</section>}
-          {nutrition && <section className="detail-information-panel"><h2>Nutritional Information</h2>{renderInformation(nutrition)}</section>}
-          {productBenefits && <section className="detail-information-panel"><h2>Benefits</h2>{renderInformation(productBenefits)}</section>}
+          {nutrition && (
+            <section className="detail-information-panel">
+              <h2>Nutritional Information</h2>
+              {renderInformation(nutrition)}
+              {product.nutritionImage && (
+                <img
+                  src={product.nutritionImage}
+                  alt={`${product.name} nutrition facts label`}
+                  className="detail-packaging-reference"
+                />
+              )}
+            </section>
+          )}
+          {productBenefits && (
+            <section className="detail-information-panel">
+              <h2>Benefits</h2>
+              {renderInformation(productBenefits)}
+              {product.benefitsImage && (
+                <img
+                  src={product.benefitsImage}
+                  alt={`${product.name} benefits and usage label`}
+                  className="detail-packaging-reference"
+                />
+              )}
+            </section>
+          )}
           {features && <section className="detail-information-panel"><h2>Product Highlights</h2>{renderInformation(features)}</section>}
+          {usageInstructions && <section className="detail-information-panel"><h2>How to Use</h2>{renderInformation(usageInstructions)}</section>}
+          {manufacturerDetails && (
+            <section className="detail-information-panel">
+              <h2>Product Information</h2>
+              {renderInformation(manufacturerDetails)}
+              {product.manufacturerImage && (
+                <img
+                  src={product.manufacturerImage}
+                  alt={`${product.name} manufacturer and FSSAI label`}
+                  className="detail-packaging-reference"
+                />
+              )}
+            </section>
+          )}
           {storageInstructions && <section className="detail-information-panel"><h2>Storage Instructions</h2>{renderInformation(storageInstructions)}</section>}
         </div>
       </div>

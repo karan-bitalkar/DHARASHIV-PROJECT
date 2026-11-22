@@ -14,7 +14,32 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     try {
       const saved = localStorage.getItem('protinut_cart');
-      return saved ? JSON.parse(saved) : [];
+      const savedItems = saved ? JSON.parse(saved) : [];
+      if (!Array.isArray(savedItems)) return [];
+
+      const replacementProduct = products.find((product) => product.id === 'dark-chocolate-crunch');
+      const migratedItems = savedItems.map((item) => {
+        if (!['classy-crunch', 'classy-crunch-1kg'].includes(item?.id) || !replacementProduct) return item;
+        const pricing = getProductPricing(replacementProduct, '1kg');
+        return {
+          ...item,
+          id: replacementProduct.id,
+          name: replacementProduct.name,
+          selectedWeight: '1kg',
+          finalPrice: pricing.finalPrice,
+          originalPrice: pricing.mrp,
+          image: replacementProduct.image
+        };
+      });
+
+      return migratedItems.reduce((items, item) => {
+        const existing = items.find((current) => (
+          current.id === item.id && current.selectedWeight === item.selectedWeight
+        ));
+        if (existing) existing.quantity += item.quantity;
+        else items.push(item);
+        return items;
+      }, []);
     } catch {
       return [];
     }
@@ -114,7 +139,7 @@ export const CartProvider = ({ children }) => {
           originalPrice: original,
           finalPrice: price,
           quantity,
-          image: managedProduct.image || '/products/classy-crunch.png',
+          image: managedProduct.image || '/products/dark-chocolate-crunch-front.png',
         }
       ];
     });

@@ -223,7 +223,7 @@ const WishlistDrawer = ({
                           src={item.image}
                           alt={item.name}
                           onError={(e) => {
-                            e.target.src = '/products/classy-crunch.png';
+                            e.target.src = '/products/dark-chocolate-crunch-front.png';
                           }}
                         />
                         {!inStock && <div className="oos-overlay">Out of Stock</div>}

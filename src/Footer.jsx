@@ -86,7 +86,7 @@ const Footer = ({ hideOnMobile = false }) => {
           <div className="footer-col">
             <h4>Our Range</h4>
             <ul>
-              <li><Link to="/products">Classy Crunch (550g / 1kg)</Link></li>
+              <li><Link to="/product/dark-chocolate-crunch">Dark Chocolate Crunch (500g / 1kg)</Link></li>
               <li><Link to="/products">Choco Crunch (550g / 1kg)</Link></li>
               <li><Link to="/products">Creamy Peanut Butter</Link></li>
               <li><Link to="/products">Honey Peanut Butter</Link></li>

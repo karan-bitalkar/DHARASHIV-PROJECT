@@ -317,7 +317,15 @@ const OrderDetailPage = () => {
                   <div key={idx} className="py-3 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-amber-50 rounded-xl p-1.5 flex items-center justify-center border border-amber-100 flex-shrink-0">
-                        <img src={item.image} alt={item.name} className="max-h-full max-w-full object-contain" />
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="max-h-full max-w-full object-contain"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = '/products/dark-chocolate-crunch-front.png';
+                          }}
+                        />
                       </div>
                       <div>
                         <h4 className="text-sm font-bold text-gray-900 font-['Montserrat']">{item.name}</h4>

@@ -172,9 +172,13 @@ const OrdersPage = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1 min-w-0">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-amber-50 rounded-xl p-2 flex items-center justify-center border border-amber-100 flex-shrink-0">
                         <img
-                          src={firstItem?.image || '/products/classy-crunch.png'}
+                          src={firstItem?.image || '/products/dark-chocolate-crunch-front.png'}
                           alt={firstItem?.name}
                           className="max-h-full max-w-full object-contain"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = '/products/dark-chocolate-crunch-front.png';
+                          }}
                         />
                       </div>
 

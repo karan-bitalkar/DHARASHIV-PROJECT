@@ -4,9 +4,7 @@ import { useGlobalSettings } from './GlobalSettingsContext';
 
 const AUTO_PLAY_INTERVAL = 3500; // ms (Flipkart uses ~3.5s)
 const MOBILE_SLIDE_SOURCES = {
-  '/hero-slides/slide-16.png': '/hero-slides-mobile/slide-16.png',
-  '/hero-slides/slide-28.png': '/hero-slides-mobile/slide-28.png',
-  '/hero-slides/slide-30.png': '/hero-slides-mobile/slide-30.png',
+  '/hero-slides/slide-16.png': '/hero-slides-mobile/slide-16.png'
 };
 
 const HeroCarousel = () => {

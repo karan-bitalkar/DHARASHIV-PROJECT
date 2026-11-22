@@ -9,7 +9,7 @@ const recipes = [
     protein: '18g Protein',
     badge: 'Quick Breakfast',
     icon: '🥪',
-    desc: 'Thick sourdough toast lathered with Classy Crunch, topped with banana slices, chia seeds, and a drizzle of raw honey.'
+    desc: 'Thick sourdough toast lathered with Dark Chocolate Crunch, topped with banana slices, chia seeds, and a drizzle of raw honey.'
   },
   {
     id: 2,

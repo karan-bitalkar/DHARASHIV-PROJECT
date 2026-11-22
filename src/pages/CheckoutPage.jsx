@@ -73,7 +73,7 @@ const CheckoutPage = () => {
   const location = useLocation();
 
   // Buy Now direct purchase support (does not modify persistent cart)
-  const buyNowSnapshot = location.state?.buyNowItem || (() => {
+  const savedBuyNowSnapshot = location.state?.buyNowItem || (() => {
     try {
       const saved = sessionStorage.getItem('protinut_buy_now_item');
       return saved ? JSON.parse(saved) : null;
@@ -81,6 +81,18 @@ const CheckoutPage = () => {
       return null;
     }
   })();
+  const replacementProduct = products.find((product) => product.id === 'dark-chocolate-crunch');
+  const buyNowSnapshot = ['classy-crunch', 'classy-crunch-1kg'].includes(savedBuyNowSnapshot?.id) && replacementProduct
+    ? {
+      ...savedBuyNowSnapshot,
+      id: replacementProduct.id,
+      name: replacementProduct.name,
+      selectedWeight: '1kg',
+      finalPrice: replacementProduct.price1kg,
+      originalPrice: replacementProduct.originalPrice1kg,
+      image: replacementProduct.image
+    }
+    : savedBuyNowSnapshot;
   const buyNowProduct = buyNowSnapshot
     ? products.find((product) => product.id === buyNowSnapshot.id)
     : null;

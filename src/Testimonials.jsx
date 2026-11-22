@@ -3,16 +3,6 @@ import './Testimonials.css';
 
 const reviews = [
   {
-    name: 'Vikramaditya S.',
-    role: 'Fitness Coach & Marathoner',
-    city: 'Mumbai',
-    rating: 5,
-    title: 'Zero oiliness, pure high-protein goodness!',
-    review: 'Most peanut butters separate into a greasy puddle on top because of low-quality palm oils. Protinut Classy Crunch has that rich, authentic roasted peanut aroma and genuine crunch. My go-to fuel pre-run!',
-    product: 'Classy Crunch 550g',
-    verified: true
-  },
-  {
     name: 'Ananya Deshmukh',
     role: 'Sports Nutritionist',
     city: 'Pune',
@@ -20,16 +10,6 @@ const reviews = [
     title: 'Guilt-free dessert craving solved!',
     review: 'Choco Crunch is absolute magic. To get real cocoa and roasted peanuts with 26g of natural plant protein without artificial chemicals is unbelievable. All my clients love it.',
     product: 'Choco Crunch 550g',
-    verified: true
-  },
-  {
-    name: 'Kabir Malhotra',
-    role: 'CrossFit Athlete',
-    city: 'Delhi',
-    rating: 5,
-    title: 'Texture and roast quality is unmatched',
-    review: 'I go through 2 kgs of peanut butter every month. The stone-ground roast gives it a deep flavor you just don’t get anywhere else. Highly recommend switching to Protinut.',
-    product: 'Classy Crunch 1kg',
     verified: true
   }
 ];

@@ -3,8 +3,9 @@ import { useOrders } from './OrderContext';
 import { useAuth } from './AuthContext';
 
 const AdminStoreContext = createContext(null);
-const CLASSY_CRUNCH_STOCK_MIGRATION_KEY = 'protinut_classy_crunch_unavailable_v1';
+const LEGACY_PRODUCT_IDS = new Set(['classy-crunch', 'classy-crunch-1kg']);
 const POWER_DUO_STOCK_MIGRATION_KEY = 'protinut_power_duo_unavailable_v1';
+const DARK_CHOCOLATE_PRICING_MIGRATION_KEY = 'protinut_dark_chocolate_pricing_v1';
 const LEGACY_CREAMY_PRODUCT_IMAGE = '/products/creamy-1kg.png';
 const ULTRA_CREAMY_PRODUCT_IMAGE = '/products/ultra-creamy-peanut-butter.png';
 
@@ -30,18 +31,54 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
     const savedDeletedIds = readStoredValue('protinut_deleted_products', []);
     const deletedIds = new Set(Array.isArray(savedDeletedIds) ? savedDeletedIds : []);
     const savedProducts = readStoredValue('protinut_products', null);
-    const shouldMigrateClassyStock = readStoredValue(CLASSY_CRUNCH_STOCK_MIGRATION_KEY, false) !== true;
     const shouldMigratePowerDuoStock = readStoredValue(POWER_DUO_STOCK_MIGRATION_KEY, false) !== true;
+    const shouldMigrateDarkChocolatePricing = readStoredValue(DARK_CHOCOLATE_PRICING_MIGRATION_KEY, false) !== true;
     const availableProducts = initialProducts.filter((product) => !deletedIds.has(product.id));
     if (!Array.isArray(savedProducts)) return availableProducts;
 
-    const savedById = new Map(savedProducts.map((product) => [product.id, product]));
+    const activeSavedProducts = savedProducts.filter((product) => !LEGACY_PRODUCT_IDS.has(product.id));
+    const savedById = new Map(activeSavedProducts.map((product) => [product.id, product]));
     const merged = availableProducts.map((product) => {
       const savedProduct = savedById.get(product.id);
       const mergedProduct = { ...product, ...(savedProduct || {}) };
       const getCurrentProductImage = (image) => (
         image === LEGACY_CREAMY_PRODUCT_IMAGE ? ULTRA_CREAMY_PRODUCT_IMAGE : image
       );
+
+      const savedComboText = `${savedProduct?.name || ''} ${savedProduct?.description || ''}`.toLowerCase();
+      if (product.id === 'dark-chocolate-crunch' && shouldMigrateDarkChocolatePricing) {
+        return {
+          ...mergedProduct,
+          inStock: product.inStock,
+          isAvailable: product.isAvailable,
+          stock: product.stock,
+          stockStatus: product.stockStatus,
+          price550: product.price550,
+          price1kg: product.price1kg,
+          originalPrice550: product.originalPrice550,
+          originalPrice1kg: product.originalPrice1kg,
+          discountPercent550: product.discountPercent550,
+          discountPercent1kg: product.discountPercent1kg,
+          defaultWeight: product.defaultWeight,
+          weightOptions: product.weightOptions,
+          weight: product.weight,
+          manufacturerDetails: product.manufacturerDetails
+        };
+      }
+
+      if (
+        ['combo-power-duo', 'combo-athlete-trio'].includes(product.id)
+        && savedComboText.includes('classy')
+      ) {
+        return {
+          ...mergedProduct,
+          name: product.name,
+          description: product.description,
+          image: product.image,
+          studioImage: product.studioImage,
+          images: product.images
+        };
+      }
 
       if (product.id === 'creamy-1kg') {
         return {
@@ -54,10 +91,7 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
         };
       }
 
-      if (
-        (product.id === 'classy-crunch' && shouldMigrateClassyStock)
-        || (product.id === 'combo-power-duo' && shouldMigratePowerDuoStock)
-      ) {
+      if (product.id === 'combo-power-duo' && shouldMigratePowerDuoStock) {
         return {
           ...mergedProduct,
           inStock: product.inStock,
@@ -71,15 +105,15 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
       return mergedProduct;
     });
     const knownIds = new Set(availableProducts.map((product) => product.id));
-    return [...merged, ...savedProducts.filter((product) => !knownIds.has(product.id) && !deletedIds.has(product.id))];
+    return [...merged, ...activeSavedProducts.filter((product) => !knownIds.has(product.id) && !deletedIds.has(product.id))];
   });
   const [customers, setCustomers] = useState(() => readStoredValue('protinut_customers', []));
 
   useEffect(() => {
     try {
       localStorage.setItem('protinut_products', JSON.stringify(products));
-      localStorage.setItem(CLASSY_CRUNCH_STOCK_MIGRATION_KEY, 'true');
       localStorage.setItem(POWER_DUO_STOCK_MIGRATION_KEY, 'true');
+      localStorage.setItem(DARK_CHOCOLATE_PRICING_MIGRATION_KEY, 'true');
     } catch (error) {
       console.error('Unable to save products to localStorage', error);
     }
@@ -208,9 +242,9 @@ export const AdminStoreProvider = ({ children, initialProducts }) => {
           const nextProduct = {
             ...product,
             ...updates,
-            price550: Number(updates.price550 ?? product.price550),
+            price550: updates.price550 == null ? product.price550 : Number(updates.price550),
             price1kg: Number(updates.price1kg ?? product.price1kg),
-            originalPrice550: Number(updates.originalPrice550 ?? product.originalPrice550 ?? product.price550),
+            originalPrice550: updates.originalPrice550 == null ? product.originalPrice550 : Number(updates.originalPrice550),
             originalPrice1kg: Number(updates.originalPrice1kg ?? product.originalPrice1kg ?? product.price1kg)
           };
           nextProduct.weightOptions = (product.weightOptions || []).map((option, index) => {

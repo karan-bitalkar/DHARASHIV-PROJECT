@@ -1,0 +1,55 @@
+.home-storage-instructions {
+  padding: clamp(2.5rem, 6vw, 5rem) 1rem;
+  background: #fbf7f1;
+}
+
+.home-storage-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.home-storage-eyebrow {
+  color: #9c1c4e;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.home-storage-container h2 {
+  margin: 0.5rem 0 1.5rem;
+  color: #2b1810;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 800;
+}
+
+.home-storage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+}
+
+.home-storage-card {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px solid rgba(43, 24, 16, 0.1);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(43, 24, 16, 0.06);
+}
+
+.home-storage-card h3 {
+  margin: 0 0 0.75rem;
+  color: #2b1810;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.home-storage-card p {
+  margin: 0;
+  color: #5f5148;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.home-storage-card p + p {
+  margin-top: 0.65rem;
+}

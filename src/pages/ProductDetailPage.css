@@ -732,6 +732,15 @@
   background: #fff;
 }
 
+.detail-packaging-reference {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  object-fit: contain;
+  margin: 1.25rem auto 0;
+}
+
 .detail-information-panel h2 {
   margin: 0 0 12px;
   color: #2b1810;

@@ -11,7 +11,7 @@ const fullRecipesList = [
     time: '3 mins',
     difficulty: 'Easy',
     servings: '1 Large Glass',
-    recommendedJar: 'Classy Crunch or Choco Crunch',
+    recommendedJar: 'Dark Chocolate Crunch or Choco Crunch',
     macros: {
       calories: '420 kcal',
       protein: '35g',
@@ -21,7 +21,7 @@ const fullRecipesList = [
     },
     shortDesc: 'The ultimate post-workout muscle recovery smoothie packed with fast and slow-digesting proteins, potassium, and healthy fats.',
     ingredients: [
-      '2 generous tablespoons (32g) PROTINUT™ Classy Crunch',
+      '2 generous tablespoons (32g) PROTINUT™ Dark Chocolate Crunch',
       '1 scoop Plant or Whey Protein (Vanilla or Chocolate)',
       '1 ripe frozen banana (peeled and sliced)',
       '250ml chilled unsweetened almond or soy milk',
@@ -31,7 +31,7 @@ const fullRecipesList = [
     ],
     instructions: [
       'Add the chilled almond milk and frozen banana slices into your high-speed blender.',
-      'Spoon in 2 generous tablespoons of PROTINUT™ Classy Crunch and your choice of protein powder.',
+      'Spoon in 2 generous tablespoons of PROTINUT™ Dark Chocolate Crunch and your choice of protein powder.',
       'Add the rolled oats, chia seeds, and a pinch of cinnamon for metabolic warmth.',
       'Blend on high for 45 to 60 seconds until completely smooth, frothy, and thick.',
       'Pour into a chilled shaker glass and drink within 30 minutes post-training to maximize glycogen recovery and muscle repair.'
@@ -45,7 +45,7 @@ const fullRecipesList = [
     time: '4 mins',
     difficulty: 'Super Easy',
     servings: '2 Slices',
-    recommendedJar: 'Classy Crunch',
+    recommendedJar: 'Dark Chocolate Crunch',
     macros: {
       calories: '320 kcal',
       protein: '19g',
@@ -53,10 +53,10 @@ const fullRecipesList = [
       fats: '14g',
       fiber: '6g'
     },
-    shortDesc: 'Crisp artisanal sourdough lathered with warm Classy Crunch, sliced bananas, and roasted super-seeds.',
+    shortDesc: 'Crisp artisanal sourdough lathered with warm Dark Chocolate Crunch, sliced bananas, and roasted super-seeds.',
     ingredients: [
       '2 thick slices of artisanal sourdough or 100% whole grain bread',
-      '2 tablespoons PROTINUT™ Classy Crunch',
+      '2 tablespoons PROTINUT™ Dark Chocolate Crunch',
       '1 small banana, thinly sliced into coins',
       '1 teaspoon chia seeds or roasted pumpkin seeds',
       '1 teaspoon raw organic honey (optional drizzle)',
@@ -64,7 +64,7 @@ const fullRecipesList = [
     ],
     instructions: [
       'Toast your sourdough slices in a toaster or on a hot tawa with a drop of ghee until deep golden and crunchy.',
-      'While the bread is still hot, generously spread 1 tablespoon of PROTINUT™ Classy Crunch across each slice (the residual heat gently melts the natural peanut oils).',
+      'While the bread is still hot, generously spread 1 tablespoon of PROTINUT™ Dark Chocolate Crunch across each slice (the residual heat gently melts the natural peanut oils).',
       'Evenly arrange your fresh banana slices over the peanut butter.',
       'Garnish with chia seeds, pumpkin seeds, a tiny drizzle of raw honey, and a pinch of flaky sea salt.',
       'Enjoy immediately with a hot cup of black coffee or green tea.'
@@ -110,7 +110,7 @@ const fullRecipesList = [
     time: '6 mins',
     difficulty: 'Easy',
     servings: '1 Large Bowl',
-    recommendedJar: 'Creamy or Classy Crunch',
+    recommendedJar: 'Creamy Peanut Butter',
     macros: {
       calories: '390 kcal',
       protein: '22g',
@@ -173,7 +173,7 @@ const fullRecipesList = [
     time: '5 mins prep (Set Overnight)',
     difficulty: 'Easy',
     servings: '1 Mason Jar',
-    recommendedJar: 'Classy Crunch or Creamy',
+    recommendedJar: 'Creamy Peanut Butter',
     macros: {
       calories: '340 kcal',
       protein: '24g',
@@ -185,14 +185,14 @@ const fullRecipesList = [
     ingredients: [
       '3 tablespoons black or white chia seeds',
       '1 cup unsweetened almond or oat milk',
-      '2 tablespoons PROTINUT™ Classy Crunch',
+      '2 tablespoons PROTINUT™ Creamy Peanut Butter',
       '1/2 teaspoon pure vanilla extract',
       '1 tablespoon raw honey or date syrup',
       '1/2 banana and pomegranate pearls for garnish'
     ],
     instructions: [
       'In a wide-mouth glass mason jar, whisk chia seeds, almond milk, vanilla extract, and honey thoroughly with a fork.',
-      'Swirl in 1 tablespoon of PROTINUT™ Classy Crunch until partially incorporated.',
+      'Swirl in 1 tablespoon of PROTINUT™ Creamy Peanut Butter until partially incorporated.',
       'Let sit on the counter for 10 minutes, whisk once more to prevent clumping, then seal and refrigerate overnight (minimum 4 hours).',
       'In the morning, unseal the jar, add the second tablespoon of peanut butter on top, and garnish with sliced bananas and pomegranate seeds.'
     ],
@@ -205,7 +205,7 @@ const fullRecipesList = [
     time: '5 mins',
     difficulty: 'Easy',
     servings: '2 Servings',
-    recommendedJar: 'Classy Crunch or Creamy',
+    recommendedJar: 'Creamy Peanut Butter',
     macros: {
       calories: '280 kcal (per serving with noodles)',
       protein: '16g',
@@ -215,7 +215,7 @@ const fullRecipesList = [
     },
     shortDesc: 'A rich, savory Thai-inspired satay sauce made with stone-ground peanuts, ginger, lime, and low-sodium soy sauce over soba noodles or tofu.',
     ingredients: [
-      '3 tablespoons PROTINUT™ Classy Crunch or Creamy',
+      '3 tablespoons PROTINUT™ Creamy Peanut Butter',
       '1.5 tablespoons low-sodium tamari or soy sauce',
       '1 tablespoon fresh lime juice',
       '1 teaspoon grated fresh ginger',
@@ -239,7 +239,7 @@ const fullRecipesList = [
     time: '5 mins prep (Freeze 1 hr)',
     difficulty: 'Easy',
     servings: '6 Bark Squares',
-    recommendedJar: 'Choco Crunch or Classy Crunch',
+    recommendedJar: 'Choco Crunch or Dark Chocolate Crunch',
     macros: {
       calories: '160 kcal (per 2 pieces)',
       protein: '7g',
@@ -250,7 +250,7 @@ const fullRecipesList = [
     shortDesc: 'Tastes exactly like a frozen Snickers candy bar, but packed with clean plant fats, potassium, and zero refined white sugars.',
     ingredients: [
       '2 large ripe bananas, sliced in half lengthwise',
-      '3 tablespoons PROTINUT™ Choco Crunch or Classy Crunch',
+      '3 tablespoons PROTINUT™ Choco Crunch or Dark Chocolate Crunch',
       '50g 70%+ dark chocolate, gently melted',
       '2 tablespoons roasted peanuts, coarsely chopped',
       'Flaky sea salt'

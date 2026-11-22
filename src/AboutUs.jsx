@@ -8,7 +8,7 @@ const milestones = [
   { year: '2021', label: 'Kitchen Roots in Dharashiv', desc: 'Frustrated by chemical peanut butters, our founder started stone-grinding handpicked peanuts in small batches.' },
   { year: '2022', label: 'FSSAI Certified & Pure', desc: 'Earned government food safety licensing with a strict zero-palm-oil standard.' },
   { year: '2023', label: '15,000+ Happy Jars', desc: 'Expanded across gyms, sports clubs, and health-conscious homes across India.' },
-  { year: '2024', label: 'Signature Flavours', desc: 'Introduced Classy Crunch and Choco Crunch, setting new benchmarks for clean Indian nutrition.' },
+  { year: '2024', label: 'Signature Flavours', desc: 'Introduced our signature crunchy peanut butter range, setting new benchmarks for clean Indian nutrition.' },
 ];
 
 // ── 2. How It's Made: 4-Step Process Journey ──

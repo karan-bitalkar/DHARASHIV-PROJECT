@@ -2,53 +2,61 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdminStore } from './AdminStoreContext';
 import { getProductStockStatus, getStockStatusClass, getStockStatusIcon, isProductPurchasable } from './productAvailability';
+import { getDiscountPercent } from './productPricing';
 import './FeaturedShowcase.css';
 
 const featuredProducts = [
   {
-    id: 'classy-crunch',
-    name: 'Peanut Butter Classy Crunch',
-    tagline: 'Pure Roasted Indian Peanuts • Irresistible Signature Crunch',
-    category: 'SIGNATURE ROAST',
-    inStock: false,
-    isAvailable: false,
-    stock: 0,
-    stockStatus: 'Currently Unavailable',
-    price550: 250,
-    price1kg: 449,
-    originalPrice550: 340,
-    originalPrice1kg: 599,
-    rating: 4.9,
-    reviewsCount: 340,
-    image: '/products/classy-crunch-original.jpg',
-    themeColor: '#ef5323',
-    themeBg: '#fff4ee',
-    borderGlow: 'rgba(239, 83, 35, 0.25)',
-    badge: '★ BESTSELLER',
-    flavorNotes: 'Crafted from hand-selected, slow-roasted Indian peanuts and stone-ground to preserve authentic aroma. Loaded with chunky roasted bits for that signature hearty crunch in every single bite.',
+    id: 'dark-chocolate-crunch',
+    name: 'PROTINUT Peanut Butter Dark Chocolate Crunch',
+    tagline: 'Dark Chocolate • Crunchy Peanut Butter',
+    category: 'DARK CHOCOLATE CRUNCH',
+    inStock: true,
+    isAvailable: true,
+    stock: 1,
+    stockStatus: 'In Stock',
+    defaultWeight: '500gm',
+    price550: 389,
+    price1kg: 589,
+    originalPrice550: 389,
+    originalPrice1kg: 589,
+    weightOptions: [
+      { id: '500gm', label: '500 Gram', price: 389, original: 389 },
+      { id: '1kg', label: '1000 Gram (1 KG)', price: 589, original: 589 }
+    ],
+    rating: 0,
+    reviewsCount: 0,
+    image: '/products/dark-chocolate-crunch-front.png',
+    themeColor: '#9c1c4e',
+    themeBg: '#fcf1f5',
+    borderGlow: 'rgba(156, 28, 78, 0.25)',
+    badge: '500G / 1KG JARS',
+    sealText: 'PEANUT BUTTER',
+    flavorNotes: 'Crunchy peanut butter made with roasted peanuts (79%) and chocolate ingredients.',
     tasteProfile: [
-      { label: 'Crunch Level', value: '100% Super Crunchy', score: '5/5' },
-      { label: 'Roast Profile', value: 'Slow Golden Roast', score: 'Warm & Nutty' },
-      { label: 'Added Sugar', value: '0g Added Sugar', score: '100% Natural' }
+      { label: 'Serving Size', value: '32g' },
+      { label: 'Protein per Serving', value: '8.32g' },
+      { label: 'Added Sugars per Serving', value: '2.56g' }
     ],
     nutrients: [
-      { label: 'Protein', value: '30g', desc: 'Per 100g' },
-      { label: 'Dietary Fiber', value: '7.8g', desc: 'High Fiber' },
-      { label: 'Trans Fat', value: '0g', desc: 'Zero Trans Fat' },
-      { label: 'Palm Oil', value: '0%', desc: 'Pure Peanut Oil' }
+      { label: 'Protein', value: '8.32g', desc: 'Per 32g serving' },
+      { label: 'Dietary Fiber', value: '2.24g', desc: 'Per 32g serving' },
+      { label: 'Trans Fat', value: '0g', desc: 'Per serving' },
+      { label: 'Cholesterol', value: '0mg', desc: 'Per serving' }
     ],
     pairings: [
-      { icon: '🍞', text: 'Crispy Toast' },
-      { icon: '🥣', text: 'Warm Oats' },
-      { icon: '🥤', text: 'Protein Shake' },
-      { icon: '🍌', text: 'Banana Slices' }
+      { icon: '🥄', text: 'Use as a dip' },
+      { icon: '🥤', text: 'Add to smoothies' },
+      { icon: '🍞', text: 'Bread' },
+      { icon: '🥨', text: 'Crackers' }
     ],
     highlights: [
-      '100% Roasted Peanuts with zero hydrogenated fats',
-      'No added fillers, stabilizers, or artificial preservatives',
-      'High in healthy unsaturated fats (MUFA/PUFA) for heart health',
-      'Clean energy boost ideal for workouts and active lifestyles'
-    ]
+      'Roasted peanuts (79%)',
+      'No trans fat',
+      'No hydrogenated oil',
+      'No artificial ingredients'
+    ],
+    photoPills: ['⚡ Energy Booster', '🥜 High Protein', '8.32g Protein per serving']
   },
   {
     id: 'choco-crunch',
@@ -104,15 +112,15 @@ const FeaturedShowcase = ({
     const managedProduct = products.find((product) => product.id === featuredProduct.id);
     return managedProduct ? { ...featuredProduct, ...managedProduct } : featuredProduct;
   });
-  // Selected weights per product ('550gm' or '1kg')
+  // Dark Chocolate Crunch offers 500gm and 1kg; other products keep their own options.
   const [selectedWeights, setSelectedWeights] = useState({
-    'classy-crunch': '550gm',
+    'dark-chocolate-crunch': '500gm',
     'choco-crunch': '550gm'
   });
 
   // Quantities per product
   const [quantities, setQuantities] = useState({
-    'classy-crunch': 1,
+    'dark-chocolate-crunch': 1,
     'choco-crunch': 1
   });
 
@@ -180,23 +188,24 @@ const FeaturedShowcase = ({
             <span className="pulse-dot" /> 100% PURE & ARTISANAL JARS
           </div>
           <h2 className="showcase-title">
-            Our Two Iconic <span className="title-gradient">Signature Jars</span>
+            Our <span className="title-gradient">Signature Jars</span>
           </h2>
           <p className="showcase-subtitle">
-            Slow-roasted in small batches from handpicked golden Indian peanuts. Zero palm oil, zero chemical fillers, and unmatched natural crunch.
+            Explore PROTINUT peanut butters with product details, packaging facts, and serving ideas.
           </p>
         </div>
 
         {/* ══════════════════════════════════════════════════════════
-            PRODUCT 1: CLASSY CRUNCH
+            PRODUCT 1: DARK CHOCOLATE CRUNCH
             Layout: Text / Information LEFT ➔ Product Photo RIGHT
             ══════════════════════════════════════════════════════════ */}
         {(() => {
           const prod = liveFeaturedProducts[0];
-          const currentWeight = selectedWeights[prod.id] || '550gm';
-          const currentPrice = currentWeight === '1kg' ? prod.price1kg : prod.price550;
-          const originalPrice = currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550;
-          const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+          const currentWeight = selectedWeights[prod.id] || prod.defaultWeight || prod.weightOptions?.[0]?.id || '550gm';
+          const currentOption = prod.weightOptions?.find((option) => option.id === currentWeight) || prod.weightOptions?.[0];
+          const currentPrice = currentOption?.price ?? (currentWeight === '1kg' ? prod.price1kg : prod.price550);
+          const originalPrice = currentOption?.original ?? (currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550);
+          const discount = getDiscountPercent(originalPrice, currentPrice);
           const qty = quantities[prod.id] || 1;
           const isWishlisted = wishlistItems.some((w) => w.id === prod.id);
           const stockStatus = getProductStockStatus(prod);
@@ -216,11 +225,17 @@ const FeaturedShowcase = ({
                   <span className="pane-highlight-tag" style={{ background: prod.themeBg, color: prod.themeColor }}>
                     {prod.badge}
                   </span>
-                  <div className="pane-rating">
-                    <span className="stars">★★★★★</span>
-                    <span className="rating-score">{prod.rating}</span>
-                    <span className="reviews-count">({prod.reviewsCount} reviews)</span>
-                  </div>
+                  {(Number(prod.rating) > 0 || Number(prod.reviewsCount) > 0) && (
+                    <div className="pane-rating">
+                      {Number(prod.rating) > 0 && (
+                        <>
+                          <span className="stars">★★★★★</span>
+                          <span className="rating-score">{prod.rating}</span>
+                        </>
+                      )}
+                      {Number(prod.reviewsCount) > 0 && <span className="reviews-count">({prod.reviewsCount} reviews)</span>}
+                    </div>
+                  )}
                 </div>
 
                 {/* Title & Tagline */}
@@ -282,22 +297,17 @@ const FeaturedShowcase = ({
                     <div className="weight-selector-group">
                       <span className="selector-label">Choose Jar Size:</span>
                       <div className="weight-pill-options">
-                        <button
-                          type="button"
-                          className={`weight-option-btn ${currentWeight === '550gm' ? 'active' : ''}`}
-                          style={currentWeight === '550gm' ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
-                          onClick={() => handleWeightChange(prod.id, '550gm')}
-                        >
-                          550gm Jar (Daily Pack)
-                        </button>
-                        <button
-                          type="button"
-                          className={`weight-option-btn ${currentWeight === '1kg' ? 'active' : ''}`}
-                          style={currentWeight === '1kg' ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
-                          onClick={() => handleWeightChange(prod.id, '1kg')}
-                        >
-                          1kg Value Tub (Mega Pack)
-                        </button>
+                        {prod.weightOptions?.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`weight-option-btn ${currentWeight === option.id ? 'active' : ''}`}
+                            style={currentWeight === option.id ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
+                            onClick={() => handleWeightChange(prod.id, option.id)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -305,9 +315,9 @@ const FeaturedShowcase = ({
                       <div className="price-current-row">
                         <span className="currency-symbol">₹</span>
                         <span className="price-number">{currentPrice}</span>
-                        <span className="price-original">₹{originalPrice}</span>
+                        {originalPrice > currentPrice && <span className="price-original">₹{originalPrice}</span>}
                       </div>
-                      <span className="save-badge">SAVE {discount}% OFF</span>
+                      <span className="save-badge">{discount > 0 ? `SAVE ${discount}% OFF` : 'MRP'}</span>
                     </div>
 
                   </div>
@@ -409,10 +419,10 @@ const FeaturedShowcase = ({
                   {/* Top Glass Badges */}
                   <div className="photo-badge-top-row">
                     <span className="photo-badge-seal">
-                      <span className="seal-dot" /> 100% NATURAL
+                      <span className="seal-dot" /> {prod.sealText || '100% NATURAL'}
                     </span>
                     <span className="photo-badge-weight">
-                      Net Qty: {currentWeight}
+                      Net Qty: {currentOption?.label || currentWeight}
                     </span>
                   </div>
 
@@ -425,9 +435,9 @@ const FeaturedShowcase = ({
 
                   {/* Bottom Feature Bar */}
                   <div className="photo-footer-pills">
-                    <span className="photo-pill">🥜 100% Slow Roasted</span>
-                    <span className="photo-pill">🚫 Zero Palm Oil</span>
-                    <span className="photo-pill">⚡ 30g Protein</span>
+                    {(prod.photoPills || ['🥜 100% Slow Roasted', '🚫 Zero Palm Oil', '⚡ 26g Protein']).map((pill) => (
+                      <span className="photo-pill" key={pill}>{pill}</span>
+                    ))}
                   </div>
 
                 </div>
@@ -443,10 +453,11 @@ const FeaturedShowcase = ({
             ══════════════════════════════════════════════════════════ */}
         {(() => {
           const prod = liveFeaturedProducts[1];
-          const currentWeight = selectedWeights[prod.id] || '550gm';
-          const currentPrice = currentWeight === '1kg' ? prod.price1kg : prod.price550;
-          const originalPrice = currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550;
-          const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+          const currentWeight = selectedWeights[prod.id] || prod.defaultWeight || prod.weightOptions?.[0]?.id || '550gm';
+          const currentOption = prod.weightOptions?.find((option) => option.id === currentWeight) || prod.weightOptions?.[0];
+          const currentPrice = currentOption?.price ?? (currentWeight === '1kg' ? prod.price1kg : prod.price550);
+          const originalPrice = currentOption?.original ?? (currentWeight === '1kg' ? prod.originalPrice1kg : prod.originalPrice550);
+          const discount = getDiscountPercent(originalPrice, currentPrice);
           const qty = quantities[prod.id] || 1;
           const isWishlisted = wishlistItems.some((w) => w.id === prod.id);
           const stockStatus = getProductStockStatus(prod);
@@ -570,22 +581,17 @@ const FeaturedShowcase = ({
                     <div className="weight-selector-group">
                       <span className="selector-label">Choose Jar Size:</span>
                       <div className="weight-pill-options">
-                        <button
-                          type="button"
-                          className={`weight-option-btn ${currentWeight === '550gm' ? 'active' : ''}`}
-                          style={currentWeight === '550gm' ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
-                          onClick={() => handleWeightChange(prod.id, '550gm')}
-                        >
-                          550gm Jar (Daily Pack)
-                        </button>
-                        <button
-                          type="button"
-                          className={`weight-option-btn ${currentWeight === '1kg' ? 'active' : ''}`}
-                          style={currentWeight === '1kg' ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
-                          onClick={() => handleWeightChange(prod.id, '1kg')}
-                        >
-                          1kg Value Tub (Mega Pack)
-                        </button>
+                        {prod.weightOptions?.map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            className={`weight-option-btn ${currentWeight === option.id ? 'active' : ''}`}
+                            style={currentWeight === option.id ? { background: prod.themeColor, borderColor: prod.themeColor } : {}}
+                            onClick={() => handleWeightChange(prod.id, option.id)}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -593,9 +599,9 @@ const FeaturedShowcase = ({
                       <div className="price-current-row">
                         <span className="currency-symbol">₹</span>
                         <span className="price-number">{currentPrice}</span>
-                        <span className="price-original">₹{originalPrice}</span>
+                        {originalPrice > currentPrice && <span className="price-original">₹{originalPrice}</span>}
                       </div>
-                      <span className="save-badge">SAVE {discount}% OFF</span>
+                      <span className="save-badge">{discount > 0 ? `SAVE ${discount}% OFF` : 'MRP'}</span>
                     </div>
 
                   </div>
