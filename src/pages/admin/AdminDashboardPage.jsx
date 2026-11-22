@@ -37,6 +37,82 @@ const handleRequiredFieldError = (event) => {
   toast.error('Please complete all required fields.', { id: 'admin-required-fields-error' });
 };
 
+const dashboardSummaryIconPaths = {
+  revenue: (
+    <>
+      <ellipse cx="12" cy="6" rx="7" ry="3" />
+      <path d="M5 6v12c0 1.66 3.13 3 7 3s7-1.34 7-3V6" />
+      <path d="M5 12c0 1.66 3.13 3 7 3s7-1.34 7-3" />
+    </>
+  ),
+  orders: (
+    <>
+      <path d="M5 8h14l1 12H4L5 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </>
+  ),
+  customers: (
+    <>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="10" cy="7" r="4" />
+      <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </>
+  ),
+  products: (
+    <>
+      <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path d="M3 8v8l9 5 9-5V8M12 13v8" />
+    </>
+  ),
+  pendingOrders: (
+    <>
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4.5V3h6v1.5M9 10h6M9 14h6M9 18h4" />
+    </>
+  ),
+  lowStock: (
+    <>
+      <path d="m10.3 3.9-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0Z" />
+      <path d="M12 9v4M12 17h.01" />
+    </>
+  ),
+  returns: (
+    <>
+      <path d="M3 10h9a6 6 0 1 1-6 6" />
+      <path d="m7 6-4 4 4 4" />
+    </>
+  ),
+  refunds: (
+    <>
+      <rect x="5" y="7" width="17" height="12" rx="2" />
+      <path d="M9 7v2m9-2v2m-9 10v-2m9 2v-2" />
+      <circle cx="15" cy="13" r="2" />
+      <path d="M8 4H3m0 0 3-3M3 4l3 3" />
+    </>
+  )
+};
+
+const DashboardSummaryIcon = ({ name }) => {
+  const paths = dashboardSummaryIconPaths[name];
+  if (!paths) throw new Error(`Unknown dashboard summary icon: ${name}`);
+
+  return (
+    <svg
+      aria-hidden="true"
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {paths}
+    </svg>
+  );
+};
+
 const pageMeta = {
   dashboard: ['Welcome to Protinut', "Here's what's happening with your store today."],
   'website-content': ['Edit Website Content', 'Update website copy and invoice details in one place.'],
@@ -91,10 +167,10 @@ const AdminDashboardPage = () => {
   const pendingReturns = orders.filter((order) => order.status === 'Return Requested').length;
   const pendingRefunds = orders.filter((order) => order.status === 'Refund Requested').length;
   const stats = [
-    { label: 'Total Revenue', value: currency(totalRevenue), icon: '₹', className: 'revenue' },
-    { label: 'Total Orders', value: orders.length.toLocaleString('en-IN'), icon: '▣', className: 'orders' },
-    { label: 'Total Customers', value: customers.length.toLocaleString('en-IN'), icon: '♙', className: 'customers' },
-    { label: 'Total Products', value: products.length.toLocaleString('en-IN'), icon: '◇', className: 'products' }
+    { label: 'Total Revenue', value: currency(totalRevenue), icon: 'revenue', className: 'revenue' },
+    { label: 'Total Orders', value: orders.length.toLocaleString('en-IN'), icon: 'orders', className: 'orders' },
+    { label: 'Total Customers', value: customers.length.toLocaleString('en-IN'), icon: 'customers', className: 'customers' },
+    { label: 'Total Products', value: products.length.toLocaleString('en-IN'), icon: 'products', className: 'products' }
   ];
 
   const handleSaveProduct = (event) => {
@@ -270,16 +346,18 @@ const AdminDashboardPage = () => {
       <section className="admin-stat-grid" aria-label="Store totals">
         {stats.map((stat) => (
           <article className="admin-stat-card" key={stat.label}>
-            <span className={`admin-stat-icon ${stat.className}`} aria-hidden="true">{stat.icon}</span>
+            <span className={`admin-stat-icon ${stat.className}`} aria-hidden="true">
+              <DashboardSummaryIcon name={stat.icon} />
+            </span>
             <div><small>{stat.label}</small><strong>{stat.value}</strong><span>Live store data</span></div>
           </article>
         ))}
       </section>
       <section className="admin-stat-grid admin-stat-grid-secondary" aria-label="Pending store activity">
-        <SummaryLink icon="▤" label="Pending Orders" value={pendingOrders} onClick={() => navigate('/admin/orders')} />
-        <SummaryLink icon="⚠" label="Low Stock" value={lowStockProducts.length} onClick={() => navigate('/admin/inventory')} />
-        <SummaryLink icon="↶" label="Pending Returns" value={pendingReturns} onClick={() => navigate('/admin/returns')} />
-        <SummaryLink icon="₹" label="Pending Refunds" value={pendingRefunds} onClick={() => navigate('/admin/refunds')} />
+        <SummaryLink icon={<DashboardSummaryIcon name="pendingOrders" />} label="Pending Orders" value={pendingOrders} onClick={() => navigate('/admin/orders')} />
+        <SummaryLink icon={<DashboardSummaryIcon name="lowStock" />} label="Low Stock" value={lowStockProducts.length} onClick={() => navigate('/admin/inventory')} />
+        <SummaryLink icon={<DashboardSummaryIcon name="returns" />} label="Pending Returns" value={pendingReturns} onClick={() => navigate('/admin/returns')} />
+        <SummaryLink icon={<DashboardSummaryIcon name="refunds" />} label="Pending Refunds" value={pendingRefunds} onClick={() => navigate('/admin/refunds')} />
       </section>
 
       <div className="admin-dashboard-grid">
